@@ -22,7 +22,12 @@ public class RestauranteJpaAdapter implements IRestaurantePersistencePort {
 
     @Override
     public boolean propietarioExisteYEsValido(Long idPropietario) {
-        var usuario = usuarioRestClient.obtenerUsuarioPorId(idPropietario);
-        return usuario != null && "PROPIETARIO".equalsIgnoreCase(usuario.getRol());
+        try{
+            var usuario = usuarioRestClient.obtenerUsuarioPorId(idPropietario);
+            return usuario != null && "PROPIETARIO".equalsIgnoreCase(usuario.getRol());
+        }catch (RuntimeException e) {
+            return false;
+        }
+
     }
 }
