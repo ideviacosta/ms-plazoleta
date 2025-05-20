@@ -4,4 +4,6 @@ import com.pragma.powerup.plazoleta.infraestructure.output.jpa.entity.Restaurant
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface IRestauranteRepository extends JpaRepository<RestauranteEntity, Long> {
+    boolean existsByIdAndIdPropietario(Long id, Long idPropietario);
+
 }

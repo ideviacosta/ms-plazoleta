@@ -5,12 +5,14 @@ import com.pragma.powerup.plazoleta.domain.spi.IRestaurantePersistencePort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class RestauranteUseCaseTest {
 
+    @Qualifier("restauranteJpaAdapter")
     private IRestaurantePersistencePort persistencePort;
     private RestauranteUseCase useCase;
 

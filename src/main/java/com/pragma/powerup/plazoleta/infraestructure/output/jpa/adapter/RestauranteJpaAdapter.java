@@ -2,15 +2,16 @@ package com.pragma.powerup.plazoleta.infraestructure.output.jpa.adapter;
 
 import com.pragma.powerup.plazoleta.domain.model.Restaurante;
 import com.pragma.powerup.plazoleta.domain.spi.IRestaurantePersistencePort;
+import com.pragma.powerup.plazoleta.domain.spi.IRestauranteValidationPort;
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.mapper.RestauranteEntityMapper;
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.repository.IRestauranteRepository;
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente.UsuarioRestClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-@Component
 @RequiredArgsConstructor
-public class RestauranteJpaAdapter implements IRestaurantePersistencePort {
+public class RestauranteJpaAdapter implements IRestaurantePersistencePort, IRestauranteValidationPort
+ {
 
     private final IRestauranteRepository restauranteRepository;
     private final UsuarioRestClient usuarioRestClient;
@@ -30,4 +31,19 @@ public class RestauranteJpaAdapter implements IRestaurantePersistencePort {
         }
 
     }
-}
+     @Override
+     public boolean esPropietarioDelRestaurante(Long idPropietario, Long idRestaurante) {
+         try {
+             var usuario = usuarioRestClient.obtenerUsuarioPorId(idPropietario);
+             if (usuario == null || !"PROPIETARIO".equalsIgnoreCase(usuario.getRol())) {
+                 return false;
+             }
+
+             return restauranteRepository.existsByIdAndIdPropietario(idRestaurante, idPropietario);
+         } catch (RuntimeException e) {
+             return false;
+         }
+     }
+
+
+ }
