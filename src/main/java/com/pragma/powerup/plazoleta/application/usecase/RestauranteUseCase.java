@@ -17,7 +17,7 @@ public class RestauranteUseCase implements IRestauranteService {
         }
 
         if (!persistencePort.propietarioExisteYEsValido(restaurante.getIdPropietario())) {
-            throw new RuntimeException("El propietario no existe o no tiene rol PROPIETARIO");
+            throw new RuntimeException("Propietario inválido: no existe o no tiene rol PROPIETARIO");
         }
 
         persistencePort.guardarRestaurante(restaurante);
