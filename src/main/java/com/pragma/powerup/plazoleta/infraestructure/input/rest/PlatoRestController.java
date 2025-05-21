@@ -29,7 +29,6 @@ public class PlatoRestController {
                                @RequestBody PlatoUpdateRequestDto dto,
                                @RequestHeader("Rol") String rol,
                                @RequestHeader("Id") Long idPropietario) {
-        System.out.println("path variable " + idPlato);
         platoHandler.modificarPlato(idPlato, dto, rol, idPropietario);
     }
 

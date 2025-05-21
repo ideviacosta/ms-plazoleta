@@ -7,6 +7,7 @@ public class PlatoEntityMapper {
 
     public static PlatoEntity toEntity(Plato plato) {
         PlatoEntity entity = new PlatoEntity();
+        entity.setId(plato.getId());
         entity.setNombre(plato.getNombre());
         entity.setPrecio(plato.getPrecio());
         entity.setDescripcion(plato.getDescripcion());

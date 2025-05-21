@@ -1,9 +1,12 @@
 package com.pragma.powerup.plazoleta.infraestructure.output.jpa.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "platos")
 @Getter
