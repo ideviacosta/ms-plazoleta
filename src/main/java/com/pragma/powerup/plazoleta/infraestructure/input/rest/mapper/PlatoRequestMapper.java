@@ -14,7 +14,7 @@ public class PlatoRequestMapper {
                 dto.getUrlImagen(),
                 dto.getIdCategoria(),
                 dto.getIdRestaurante(),
-                null // activo se define en el caso de uso
+                null
         );
     }
 }

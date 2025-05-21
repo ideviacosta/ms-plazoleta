@@ -47,34 +47,17 @@ public class PlatoUseCase implements IPlatoService {
 
     @Override
     public void modificarPlato(Long idPlato, Integer nuevoPrecio, String nuevaDescripcion, String rol, Long idPropietario) {
-        System.out.println("===> Iniciando modificación de plato:");
-        System.out.println("idPlato = " + idPlato);
-        System.out.println("nuevoPrecio = " + nuevoPrecio);
-        System.out.println("nuevaDescripcion = " + nuevaDescripcion);
-        System.out.println("rol = " + rol);
-        System.out.println("idPropietario = " + idPropietario);
-
-        if (!"PROPIETARIO".equals(rol)) {
-            System.out.println("❌ Rol no autorizado");
+               if (!"PROPIETARIO".equals(rol)) {
             throw new RuntimeException("Solo el propietario puede modificar platos");
         }
-
         if (nuevoPrecio == null || nuevoPrecio <= 0 || nuevaDescripcion == null || nuevaDescripcion.trim().isEmpty()) {
-            System.out.println("❌ Precio o descripción inválidos");
             throw new RuntimeException("Precio y descripción válidos son obligatorios");
         }
-
         boolean esPropietario = restauranteValidationPort.esPropietarioDelPlato(idPlato, idPropietario);
-        System.out.println("¿Es propietario del plato?: " + esPropietario);
-
         if (!esPropietario) {
-            System.out.println("❌ El propietario no tiene permiso sobre este plato");
             throw new RuntimeException("No puede modificar platos de un restaurante que no le pertenece");
         }
-
-        System.out.println("✅ Validaciones pasadas, procediendo a actualizar el plato...");
         persistencePort.actualizarPlato(idPlato, nuevoPrecio, nuevaDescripcion);
-        System.out.println("✅ Plato actualizado exitosamente");
     }
 
 

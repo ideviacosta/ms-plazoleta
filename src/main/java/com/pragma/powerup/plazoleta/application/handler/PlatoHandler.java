@@ -22,8 +22,8 @@ public class PlatoHandler implements IPlatoHandler {
         try {
             platoService.modificarPlato(idPlato, dto.getPrecio(), dto.getDescripcion(), rol, idPropietario);
         } catch (Exception e) {
-            e.printStackTrace(); // Imprime en consola el error real
-            throw e; // repropaga para que lo capture el handler global si lo tienes
+            e.printStackTrace();
+            throw e;
         }
     }
 
