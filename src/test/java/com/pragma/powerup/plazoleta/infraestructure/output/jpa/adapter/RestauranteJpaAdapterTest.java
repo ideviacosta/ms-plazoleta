@@ -40,4 +40,34 @@ class RestauranteJpaAdapterTest {
         adapter.guardarRestaurante(restaurante);
         verify(restauranteRepository).save(any());
     }
+
+    @Test
+    void esPropietarioDelRestaurante_retornaTrue_siUsuarioEsPropietarioYRestauranteExiste() {
+        Long idPropietario = 1L;
+        Long idRestaurante = 2L;
+
+        fakeUsuarioRestClient.setDevolverPropietario(true);
+        when(restauranteRepository.existsByIdAndIdPropietario(idRestaurante, idPropietario)).thenReturn(true);
+
+        boolean resultado = adapter.esPropietarioDelRestaurante(idPropietario, idRestaurante);
+
+        assertTrue(resultado);
+    }
+    @Test
+    void esPropietarioDelRestaurante_retornaFalse_siUsuarioNoEsPropietario() {
+        fakeUsuarioRestClient.setDevolverPropietario(false); // retornará usuario con rol ADMIN
+
+        boolean resultado = adapter.esPropietarioDelRestaurante(1L, 1L);
+
+        assertFalse(resultado);
+    }
+    @Test
+    void esPropietarioDelRestaurante_retornaFalse_siUsuarioNoExiste() {
+        fakeUsuarioRestClient.setDevolverNull(true);
+
+        boolean resultado = adapter.esPropietarioDelRestaurante(1L, 1L);
+
+        assertFalse(resultado);
+    }
+
 }
