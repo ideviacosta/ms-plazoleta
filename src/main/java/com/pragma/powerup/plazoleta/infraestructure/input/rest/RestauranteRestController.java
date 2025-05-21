@@ -2,6 +2,7 @@ package com.pragma.powerup.plazoleta.infraestructure.input.rest;
 
 import com.pragma.powerup.plazoleta.application.handler.IRestauranteHandler;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.RestauranteRequestDto;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,9 @@ public class RestauranteRestController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void crearRestaurante(@Valid @RequestBody RestauranteRequestDto dto,
-                                 @RequestHeader("Rol") String rolCreador) {
+                                 HttpServletRequest request) {
+        String rolCreador = (String) request.getAttribute("usuarioRol");
+
         restauranteHandler.crearRestaurante(dto, rolCreador);
     }
 }
