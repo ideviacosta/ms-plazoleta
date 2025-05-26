@@ -70,4 +70,36 @@ class RestauranteJpaAdapterTest {
         assertFalse(resultado);
     }
 
+    @Test
+    void esPropietarioDelPlato_devuelveTrue_siExisteRelacion() {
+        // Arrange
+        Long idPlato = 1L;
+        Long idPropietario = 10L;
+
+        when(restauranteRepository.existsByIdAndIdPropietario(idPlato, idPropietario)).thenReturn(true);
+
+        // Act
+        boolean resultado = adapter.esPropietarioDelPlato(idPlato, idPropietario);
+
+        // Assert
+        assertTrue(resultado);
+        verify(restauranteRepository).existsByIdAndIdPropietario(idPlato, idPropietario);
+    }
+
+    @Test
+    void esPropietarioDelPlato_devuelveFalse_siNoExisteRelacion() {
+        // Arrange
+        Long idPlato = 1L;
+        Long idPropietario = 10L;
+
+        when(restauranteRepository.existsByIdAndIdPropietario(idPlato, idPropietario)).thenReturn(false);
+
+        // Act
+        boolean resultado = adapter.esPropietarioDelPlato(idPlato, idPropietario);
+
+        // Assert
+        assertFalse(resultado);
+        verify(restauranteRepository).existsByIdAndIdPropietario(idPlato, idPropietario);
+    }
+
 }

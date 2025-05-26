@@ -16,8 +16,13 @@ spring:
       hibernate:
         format_sql: true
 
+  profiles:
+    active: test
+
 usuarios:
   url: ${USUARIOS_SERVICE_URL:http://localhost:8081}
 
 jwt:
   secret: clave-super-secreta-de-al-menos-32-caracteres
+  filter:
+    enabled: true

@@ -39,7 +39,8 @@ class RestauranteUseCaseTest {
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> useCase.crearRestaurante(restaurante, "PROPIETARIO"));
 
-        assertEquals("Solo un administrador puede crear restaurantes", ex.getMessage());
+        assertTrue(ex.getMessage().contains("Se requiere rol"));
+
         verify(persistencePort, never()).guardarRestaurante(any());
     }
 

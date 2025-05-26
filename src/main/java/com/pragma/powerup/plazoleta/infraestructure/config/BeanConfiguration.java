@@ -9,7 +9,7 @@ import com.pragma.powerup.plazoleta.domain.api.IRestauranteService;
 import com.pragma.powerup.plazoleta.domain.spi.IPlatoPersistencePort;
 import com.pragma.powerup.plazoleta.domain.spi.IRestaurantePersistencePort;
 import com.pragma.powerup.plazoleta.domain.spi.IRestauranteValidationPort;
-import com.pragma.powerup.plazoleta.domain.util.JwtUtil;
+import com.pragma.powerup.plazoleta.util.JwtUtil;
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.adapter.PlatoJpaAdapter;
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.adapter.RestauranteJpaAdapter;
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.repository.IPlatoRepository;

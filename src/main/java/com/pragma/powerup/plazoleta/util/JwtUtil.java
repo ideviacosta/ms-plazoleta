@@ -1,4 +1,4 @@
-package com.pragma.powerup.plazoleta.domain.util;
+package com.pragma.powerup.plazoleta.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

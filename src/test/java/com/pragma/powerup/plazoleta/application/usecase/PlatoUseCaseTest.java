@@ -1,11 +1,12 @@
 package com.pragma.powerup.plazoleta.application.usecase;
 
+import com.pragma.powerup.plazoleta.domain.exception.PropietarioInvalidoException;
+import com.pragma.powerup.plazoleta.domain.exception.ValidacionCampoException;
 import com.pragma.powerup.plazoleta.domain.model.Plato;
 import com.pragma.powerup.plazoleta.domain.spi.IPlatoPersistencePort;
 import com.pragma.powerup.plazoleta.domain.spi.IRestauranteValidationPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -13,126 +14,89 @@ import static org.mockito.Mockito.*;
 class PlatoUseCaseTest {
 
     private IPlatoPersistencePort persistencePort;
-    private IRestauranteValidationPort validationPort;
-    private PlatoUseCase useCase;
+    private IRestauranteValidationPort restauranteValidationPort;
+    private PlatoUseCase platoUseCase;
 
     @BeforeEach
     void setUp() {
         persistencePort = mock(IPlatoPersistencePort.class);
-        validationPort = mock(IRestauranteValidationPort.class);
-        useCase = new PlatoUseCase(persistencePort, validationPort);
+        restauranteValidationPort = mock(IRestauranteValidationPort.class);
+        platoUseCase = new PlatoUseCase(persistencePort, restauranteValidationPort);
     }
 
     @Test
-    void crearPlato_exitoso() {
-        Plato plato = new Plato(null, "Pizza", 12000, "Pizza margarita", "http://img.com/pizza.jpg", 1L, 1L, null);
-        when(validationPort.esPropietarioDelRestaurante(2L, 1L)).thenReturn(true);
+    void crearPlato_ok() {
+        Plato plato = new Plato(null, "Pizza",  10000, "Rica","img.jpg", 1L, 2L, true);
+        when(restauranteValidationPort.esPropietarioDelRestaurante(10L, 2L)).thenReturn(true);
 
-        useCase.crearPlato(plato, "PROPIETARIO", 2L);
-
-        verify(persistencePort).guardarPlato(any(Plato.class));
-        assertTrue(plato.getActivo());
+        assertDoesNotThrow(() -> platoUseCase.crearPlato(plato, "PROPIETARIO", 10L));
+        verify(persistencePort).guardarPlato(plato);
     }
 
     @Test
-    void crearPlato_fallaPorRolNoValido() {
-        Plato plato = new Plato(null, "Pizza", 12000, "Pizza margarita", "http://img.com/pizza.jpg", 1L, 1L, null);
-
-        Exception ex = assertThrows(RuntimeException.class, () ->
-                useCase.crearPlato(plato, "ADMIN", 2L));
-        System.out.println("Mensaje real: " + ex.getMessage());
-        assertEquals("Solo el propietario puede crear platos", ex.getMessage());
+    void crearPlato_lanzaExcepcionSiRolInvalido() {
+        Plato plato = new Plato();
+        Exception ex = assertThrows(RuntimeException.class, () -> platoUseCase.crearPlato(plato, "ADMIN", 1L));
+        assertTrue(ex.getMessage().contains("Se requiere rol: PROPIETARIO"));
     }
 
     @Test
-    void crearPlato_fallaPorPrecioInvalido() {
-        Plato plato = new Plato(null, "Pizza", 0, "desc", "http://img.com", 1L, 1L, null);
-        when(validationPort.esPropietarioDelRestaurante(2L, 1L)).thenReturn(true);
-        Exception ex = assertThrows(RuntimeException.class, () -> {
-            useCase.crearPlato(plato, "PROPIETARIO", 2L);
-        });
+    void crearPlato_lanzaExcepcionSiNoEsPropietario() {
+        Plato plato = new Plato(null, "Pizza",  10000, "Rica","img.jpg", 1L, 2L, true);
+        when(restauranteValidationPort.esPropietarioDelRestaurante(99L, 2L)).thenReturn(false);
 
-        System.out.println("💥 Mensaje real: " + ex.getMessage());
-        assertTrue(ex.getMessage() != null && ex.getMessage().toLowerCase().contains("precio"));
+        assertThrows(PropietarioInvalidoException.class, () -> platoUseCase.crearPlato(plato, "PROPIETARIO", 99L));
     }
 
     @Test
-    void crearPlato_fallaPorCamposVacios() {
-        Plato plato = new Plato(null, "", 10000, "", "", 1L, 1L, null);
-        when(validationPort.esPropietarioDelRestaurante(2L, 1L)).thenReturn(true);
-        Exception ex = assertThrows(RuntimeException.class, () -> {
-            useCase.crearPlato(plato, "PROPIETARIO", 2L);
-        });
-
-        System.out.println("💥 Mensaje real (campos vacíos): " + ex.getMessage());
-        assertTrue(ex.getMessage().contains("obligatorios"));
-    }
+    void crearPlato_lanzaExcepcionSiPrecioInvalido() {
+        Plato plato = new Plato(1L, "Arroz", 0, "Descripción", "url", 1L, 1L, true);
+        when(restauranteValidationPort.esPropietarioDelRestaurante(eq(1L), eq(1L))).thenReturn(true);
+        assertThrows(ValidacionCampoException.class, () ->
+                platoUseCase.crearPlato(plato, "PROPIETARIO", 1L)
+        );  }
 
     @Test
-    void crearPlato_fallaSiCategoriaEsNull() {
-        Plato plato = new Plato(null, "Arroz", 10000, "desc", "http://img.com", null, 1L, null);
-        when(validationPort.esPropietarioDelRestaurante(2L, 1L)).thenReturn(true);
-        Exception ex = assertThrows(RuntimeException.class, () -> {
-            useCase.crearPlato(plato, "PROPIETARIO", 2L);
-        });
+    void crearPlato_lanzaExcepcionSiCamposObligatoriosFaltan() {
+        Plato plato = new Plato(1L, "", 20000, "", "", 1L, 1L, true);
+        when(restauranteValidationPort.esPropietarioDelRestaurante(eq(1L), eq(1L))).thenReturn(true);
 
-        System.out.println("💥 Mensaje real (categoría): " + ex.getMessage());
-        assertTrue(ex.getMessage().contains("categoría"));
-    }
-
+        assertThrows(ValidacionCampoException.class, () ->
+                platoUseCase.crearPlato(plato, "PROPIETARIO", 1L)
+        );   }
 
     @Test
-    void crearPlato_fallaSiNoEsPropietarioDelRestaurante() {
-        Plato plato = new Plato(null, "Sopa", 8000, "desc", "http://img.com", 1L, 1L, null);
-        when(validationPort.esPropietarioDelRestaurante(2L, 1L)).thenReturn(false);
+    void crearPlato_lanzaExcepcionSiCategoriaNula() {
+        Plato plato = new Plato(1L, "Arroz",15000 , "Rico", "url", null, 1L, true);
+        when(restauranteValidationPort.esPropietarioDelRestaurante(eq(1L), eq(1L))).thenReturn(true);
 
-        Exception ex = assertThrows(RuntimeException.class, () ->
-                useCase.crearPlato(plato, "PROPIETARIO", 2L));
-        System.out.println("Mensaje real: " + ex.getMessage());
-        assertEquals("No puede crear platos para un restaurante que no le pertenece", ex.getMessage());
-    }
+        assertThrows(ValidacionCampoException.class, () ->
+                platoUseCase.crearPlato(plato, "PROPIETARIO", 1L)
+        );   }
 
     @Test
     void modificarPlato_ok() {
-        when(validationPort.esPropietarioDelPlato(1L, 10L)).thenReturn(true);
+        when(restauranteValidationPort.esPropietarioDelPlato(5L, 1L)).thenReturn(true);
 
-        assertDoesNotThrow(() ->
-                useCase.modificarPlato(1L, 20000, "Nueva descripción", "PROPIETARIO", 10L)
-        );
-
-        verify(persistencePort).actualizarPlato(1L, 20000, "Nueva descripción");
+        assertDoesNotThrow(() -> platoUseCase.modificarPlato(5L, 15000, "Nueva desc", "PROPIETARIO", 1L));
+        verify(persistencePort).actualizarPlato(5L, 15000, "Nueva desc");
     }
 
     @Test
-    void modificarPlato_fallaSiNoEsPropietario() {
-        when(validationPort.esPropietarioDelPlato(1L, 99L)).thenReturn(false);
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                useCase.modificarPlato(1L, 20000, "Nueva", "PROPIETARIO", 99L)
-        );
-
-        assertEquals("No puede modificar platos de un restaurante que no le pertenece", exception.getMessage());
+    void modificarPlato_lanzaExcepcionSiRolIncorrecto() {
+        Exception ex = assertThrows(RuntimeException.class, () -> platoUseCase.modificarPlato(1L, 10000, "desc", "ADMIN", 1L));
+        assertTrue(ex.getMessage().contains("Se requiere rol: PROPIETARIO"));
     }
 
     @Test
-    void modificarPlato_fallaSiRolNoEsPropietario() {
-        RuntimeException exception = assertThrows(RuntimeException.class, () ->
-                useCase.modificarPlato(1L, 15000, "Descripción", "ADMIN", 10L)
-        );
-
-        assertEquals("Solo el propietario puede modificar platos", exception.getMessage());
+    void modificarPlato_lanzaExcepcionSiDatosInvalidos() {
+        assertThrows(ValidacionCampoException.class, () -> platoUseCase.modificarPlato(1L, -500, "", "PROPIETARIO", 1L));
     }
 
     @Test
-    void modificarPlato_fallaSiPrecioODescripcionInvalidos() {
-        RuntimeException ex1 = assertThrows(RuntimeException.class, () ->
-                useCase.modificarPlato(1L, 0, "desc", "PROPIETARIO", 10L)
-        );
-        assertEquals("Precio y descripción válidos son obligatorios", ex1.getMessage());
+    void modificarPlato_lanzaExcepcionSiNoEsPropietarioDelPlato() {
+        when(restauranteValidationPort.esPropietarioDelPlato(1L, 2L)).thenReturn(false);
 
-        RuntimeException ex2 = assertThrows(RuntimeException.class, () ->
-                useCase.modificarPlato(1L, 10000, "", "PROPIETARIO", 10L)
-        );
-        assertEquals("Precio y descripción válidos son obligatorios", ex2.getMessage());
+        assertThrows(PropietarioInvalidoException.class, () -> platoUseCase.modificarPlato(1L, 12000, "Desc", "PROPIETARIO", 2L));
     }
 }

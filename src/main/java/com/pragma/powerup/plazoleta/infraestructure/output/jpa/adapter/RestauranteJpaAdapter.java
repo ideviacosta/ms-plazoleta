@@ -7,7 +7,6 @@ import com.pragma.powerup.plazoleta.infraestructure.output.jpa.mapper.Restaurant
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.repository.IRestauranteRepository;
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente.UsuarioRestClient;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
 public class RestauranteJpaAdapter implements IRestaurantePersistencePort, IRestauranteValidationPort
@@ -49,7 +48,5 @@ public class RestauranteJpaAdapter implements IRestaurantePersistencePort, IRest
      public boolean esPropietarioDelPlato(Long idPlato, Long idPropietario) {
          return restauranteRepository.existsByIdAndIdPropietario(idPlato, idPropietario);
      }
-
-
 
  }

@@ -1,6 +1,6 @@
 package com.pragma.powerup.plazoleta.infraestructure.security;
 
-import com.pragma.powerup.plazoleta.domain.util.JwtUtil;
+import com.pragma.powerup.plazoleta.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

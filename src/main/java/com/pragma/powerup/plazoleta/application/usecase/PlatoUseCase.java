@@ -1,64 +1,62 @@
 package com.pragma.powerup.plazoleta.application.usecase;
 
 import com.pragma.powerup.plazoleta.domain.api.IPlatoService;
+import com.pragma.powerup.plazoleta.domain.exception.PropietarioInvalidoException;
+import com.pragma.powerup.plazoleta.domain.exception.ValidacionCampoException;
 import com.pragma.powerup.plazoleta.domain.model.Plato;
 import com.pragma.powerup.plazoleta.domain.spi.IPlatoPersistencePort;
 import com.pragma.powerup.plazoleta.domain.spi.IRestauranteValidationPort;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+
+import static com.pragma.powerup.plazoleta.util.MensajesError.*;
+import static com.pragma.powerup.plazoleta.util.RolValidator.*;
 
 @RequiredArgsConstructor
 public class PlatoUseCase implements IPlatoService {
 
     private final IPlatoPersistencePort persistencePort;
-    @Qualifier("restauranteJpaAdapter")
     private final IRestauranteValidationPort restauranteValidationPort;
 
     @Override
     public void crearPlato(Plato plato, String rol, Long idPropietario) {
-        if (!"PROPIETARIO".equals(rol)) {
-            throw new RuntimeException("Solo el propietario puede crear platos");
-        }
+        validarRol(rol, "PROPIETARIO");
 
         if (!restauranteValidationPort.esPropietarioDelRestaurante(idPropietario, plato.getIdRestaurante())) {
-            throw new RuntimeException("No puede crear platos para un restaurante que no le pertenece");
+            throw new PropietarioInvalidoException(PROPIETARIO_NO_DUENIO_RESTAURANTE);
         }
 
         if (plato.getPrecio() == null || plato.getPrecio() <= 0) {
-            throw new RuntimeException("El precio debe ser un número entero positivo mayor a 0");
+            throw new ValidacionCampoException(PRECIO_INVALIDO);
         }
 
         if (isEmpty(plato.getNombre()) || isEmpty(plato.getDescripcion()) || isEmpty(plato.getUrlImagen())) {
-            throw new RuntimeException("Todos los campos obligatorios deben estar diligenciados");
+            throw new ValidacionCampoException(CAMPOS_OBLIGATORIOS);
         }
 
         if (plato.getIdCategoria() == null) {
-            throw new RuntimeException("El plato debe tener una categoría");
+            throw new ValidacionCampoException(CATEGORIA_OBLIGATORIA);
         }
 
         plato.setActivo(true);
         persistencePort.guardarPlato(plato);
     }
 
-    private boolean isEmpty(String valor) {
-        return valor == null || valor.trim().isEmpty();
-    }
-
     @Override
     public void modificarPlato(Long idPlato, Integer nuevoPrecio, String nuevaDescripcion, String rol, Long idPropietario) {
-               if (!"PROPIETARIO".equals(rol)) {
-            throw new RuntimeException("Solo el propietario puede modificar platos");
+        validarRol(rol, "PROPIETARIO");
+
+        if (nuevoPrecio == null || nuevoPrecio <= 0 || isEmpty(nuevaDescripcion)) {
+            throw new ValidacionCampoException(PRECIO_Y_DESCRIPCION_INVALIDOS);
         }
-        if (nuevoPrecio == null || nuevoPrecio <= 0 || nuevaDescripcion == null || nuevaDescripcion.trim().isEmpty()) {
-            throw new RuntimeException("Precio y descripción válidos son obligatorios");
+
+        if (!restauranteValidationPort.esPropietarioDelPlato(idPlato, idPropietario)) {
+            throw new PropietarioInvalidoException(PROPIETARIO_NO_DUENIO_PLATO);
         }
-        boolean esPropietario = restauranteValidationPort.esPropietarioDelPlato(idPlato, idPropietario);
-        if (!esPropietario) {
-            throw new RuntimeException("No puede modificar platos de un restaurante que no le pertenece");
-        }
+
         persistencePort.actualizarPlato(idPlato, nuevoPrecio, nuevaDescripcion);
     }
 
-
+    private boolean isEmpty(String valor) {
+        return valor == null || valor.trim().isEmpty();
+    }
 }

@@ -1,6 +1,6 @@
 package com.pragma.powerup.plazoleta.infraestructure.security;
 
-import com.pragma.powerup.plazoleta.domain.util.JwtUtil;
+import com.pragma.powerup.plazoleta.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -27,8 +27,8 @@ public class AuthInterceptor implements HandlerInterceptor {
             Long userId = jwtUtil.getIdUsuario(jwt);
             String rol = jwtUtil.getRol(jwt);
 
-            request.setAttribute("usuarioId", userId);
-            request.setAttribute("usuarioRol", rol);
+            request.setAttribute("idUsuario", userId);
+            request.setAttribute("rol", rol);
 
             return true;
 

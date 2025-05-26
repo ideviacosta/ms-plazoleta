@@ -1,9 +1,14 @@
 package com.pragma.powerup.plazoleta.application.usecase;
 
 import com.pragma.powerup.plazoleta.domain.api.IRestauranteService;
+import com.pragma.powerup.plazoleta.domain.exception.PropietarioInvalidoException;
+import com.pragma.powerup.plazoleta.domain.exception.ValidacionCampoException;
 import com.pragma.powerup.plazoleta.domain.model.Restaurante;
 import com.pragma.powerup.plazoleta.domain.spi.IRestaurantePersistencePort;
 import lombok.RequiredArgsConstructor;
+
+import static com.pragma.powerup.plazoleta.util.MensajesError.*;
+import static com.pragma.powerup.plazoleta.util.RolValidator.*;
 
 @RequiredArgsConstructor
 public class RestauranteUseCase implements IRestauranteService {
@@ -12,12 +17,10 @@ public class RestauranteUseCase implements IRestauranteService {
 
     @Override
     public void crearRestaurante(Restaurante restaurante, String rolCreador) {
-        if (!"ADMINISTRADOR".equalsIgnoreCase(rolCreador.trim())) {
-            throw new RuntimeException("Solo un administrador puede crear restaurantes");
-        }
+        validarRol(rolCreador, "ADMINISTRADOR");
 
         if (!persistencePort.propietarioExisteYEsValido(restaurante.getIdPropietario())) {
-            throw new RuntimeException("Propietario inválido: no existe o no tiene rol PROPIETARIO");
+            throw new PropietarioInvalidoException(PROPIETARIO_INVALIDO);
         }
 
         persistencePort.guardarRestaurante(restaurante);
