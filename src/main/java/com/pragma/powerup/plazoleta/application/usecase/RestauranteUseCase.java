@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 
 import static com.pragma.powerup.plazoleta.util.MensajesError.*;
 import static com.pragma.powerup.plazoleta.util.RolValidator.*;
+import static com.pragma.powerup.plazoleta.util.Roles.*;
+
 
 @RequiredArgsConstructor
 public class RestauranteUseCase implements IRestauranteService {
@@ -17,7 +19,7 @@ public class RestauranteUseCase implements IRestauranteService {
 
     @Override
     public void crearRestaurante(Restaurante restaurante, String rolCreador) {
-        validarRol(rolCreador, "ADMINISTRADOR");
+        validarRol(rolCreador, ADMINISTRADOR);
 
         if (!persistencePort.propietarioExisteYEsValido(restaurante.getIdPropietario())) {
             throw new PropietarioInvalidoException(PROPIETARIO_INVALIDO);

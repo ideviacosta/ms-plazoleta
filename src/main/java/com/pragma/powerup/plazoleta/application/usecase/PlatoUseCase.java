@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 
 import static com.pragma.powerup.plazoleta.util.MensajesError.*;
 import static com.pragma.powerup.plazoleta.util.RolValidator.*;
+import static com.pragma.powerup.plazoleta.util.Roles.*;
 
 @RequiredArgsConstructor
 public class PlatoUseCase implements IPlatoService {
@@ -19,7 +20,7 @@ public class PlatoUseCase implements IPlatoService {
 
     @Override
     public void crearPlato(Plato plato, String rol, Long idPropietario) {
-        validarRol(rol, "PROPIETARIO");
+        validarRol(rol, PROPIETARIO);
 
         if (!restauranteValidationPort.esPropietarioDelRestaurante(idPropietario, plato.getIdRestaurante())) {
             throw new PropietarioInvalidoException(PROPIETARIO_NO_DUENIO_RESTAURANTE);
@@ -43,7 +44,7 @@ public class PlatoUseCase implements IPlatoService {
 
     @Override
     public void modificarPlato(Long idPlato, Integer nuevoPrecio, String nuevaDescripcion, String rol, Long idPropietario) {
-        validarRol(rol, "PROPIETARIO");
+        validarRol(rol, PROPIETARIO);
 
         if (nuevoPrecio == null || nuevoPrecio <= 0 || isEmpty(nuevaDescripcion)) {
             throw new ValidacionCampoException(PRECIO_Y_DESCRIPCION_INVALIDOS);
