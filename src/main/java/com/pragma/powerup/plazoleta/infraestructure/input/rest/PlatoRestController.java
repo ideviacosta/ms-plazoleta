@@ -1,6 +1,7 @@
 package com.pragma.powerup.plazoleta.infraestructure.input.rest;
 
 import com.pragma.powerup.plazoleta.application.handler.IPlatoHandler;
+import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoEstadoRequestDto;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoRequestDto;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoUpdateRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -52,4 +53,21 @@ public class PlatoRestController {
 
         platoHandler.modificarPlato(idPlato, dto, rol, idPropietario);
     }
+
+    @Operation(summary = "Habilitar o deshabilitar un plato", security = @SecurityRequirement(name = "BearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Plato modificado correctamente"),
+            @ApiResponse(responseCode = "403", description = "No autorizado")
+    })
+    @PutMapping("/{idPlato}/estado")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void cambiarEstadoPlato(@PathVariable Long idPlato,
+                                   @RequestBody PlatoEstadoRequestDto dto,
+                                   HttpServletRequest request) {
+        String rol = (String) request.getAttribute("rol");
+        Long idPropietario = (Long) request.getAttribute("idUsuario");
+
+        platoHandler.cambiarEstadoPlato(idPlato, dto.isHabilitar(), rol, idPropietario);
+    }
+
 }

@@ -60,4 +60,16 @@ public class PlatoUseCase implements IPlatoService {
     private boolean isEmpty(String valor) {
         return valor == null || valor.trim().isEmpty();
     }
+
+    @Override
+    public void cambiarEstadoPlato(Long idPlato, boolean habilitar, String rol, Long idPropietario) {
+        validarRol(rol, "PROPIETARIO");
+
+        if (!restauranteValidationPort.esPropietarioDelPlato(idPlato, idPropietario)) {
+            throw new PropietarioInvalidoException(PROPIETARIO_NO_DUENIO_PLATO);
+        }
+
+        persistencePort.cambiarEstadoPlato(idPlato, habilitar);
+    }
+
 }

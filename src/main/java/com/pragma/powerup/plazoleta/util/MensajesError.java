@@ -11,4 +11,5 @@ public class MensajesError {
     public static final String PROPIETARIO_NO_DUENIO_PLATO = "No puede modificar platos de un restaurante que no le pertenece";
     public static final String SOLO_ADMIN_PUEDE_CREAR_RESTAURANTE = "Solo un administrador puede crear restaurantes";
     public static final String PROPIETARIO_INVALIDO = "Propietario inválido: no existe o no tiene rol PROPIETARIO";
+    public static final String PLATO_NO_EXISTE = "Plato no existe";
 }

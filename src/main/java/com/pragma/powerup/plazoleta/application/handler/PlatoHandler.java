@@ -27,5 +27,10 @@ public class PlatoHandler implements IPlatoHandler {
         }
     }
 
+    @Override
+    public void cambiarEstadoPlato(Long idPlato, boolean habilitar, String rol, Long idPropietario) {
+        platoService.cambiarEstadoPlato(idPlato, habilitar, rol, idPropietario);
+    }
+
 
 }

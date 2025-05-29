@@ -35,4 +35,48 @@ class PlatoHandlerTest {
         // Assert
         verify(platoService).crearPlato(any(), eq("PROPIETARIO"), eq(2L));
     }
+
+    @Test
+    void testHabilitarPlato() {
+        // Arrange
+        Long idPlato = 1L;
+        boolean nuevoEstado = true;
+        String rol = "PROPIETARIO";
+        Long idPropietario = 10L;
+
+        // Act
+        platoHandler.cambiarEstadoPlato(idPlato, nuevoEstado, rol, idPropietario);
+
+        // Assert
+        verify(platoService).cambiarEstadoPlato(idPlato, nuevoEstado, rol, idPropietario);
+    }
+
+    @Test
+    void testDeshabilitarPlato() {
+        // Arrange
+        Long idPlato = 2L;
+        boolean nuevoEstado = false;
+        String rol = "PROPIETARIO";
+        Long idPropietario = 20L;
+
+        // Act
+        platoHandler.cambiarEstadoPlato(idPlato, nuevoEstado, rol, idPropietario);
+
+        // Assert
+        verify(platoService).cambiarEstadoPlato(idPlato, nuevoEstado, rol, idPropietario);
+    }
+
+    @Test
+    void testLlamadoConRolIncorrectoNoLanzaExcepcionDesdeHandler() {
+        // Nota: El handler delega en el service la validación del rol,
+        // por lo tanto, desde el handler se llama igual.
+        Long idPlato = 3L;
+        boolean nuevoEstado = true;
+        String rol = "CLIENTE";
+        Long idPropietario = 30L;
+
+        platoHandler.cambiarEstadoPlato(idPlato, nuevoEstado, rol, idPropietario);
+
+        verify(platoService).cambiarEstadoPlato(idPlato, nuevoEstado, rol, idPropietario);
+    }
 }

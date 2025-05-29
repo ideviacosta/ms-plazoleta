@@ -6,5 +6,6 @@ import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoUpdateRe
 public interface IPlatoHandler {
     void crearPlato(PlatoRequestDto dto, String rol, Long idPropietario);
     void modificarPlato(Long idPlato, PlatoUpdateRequestDto dto, String rol, Long idPropietario);
+    void cambiarEstadoPlato(Long idPlato, boolean habilitar, String rol, Long idPropietario);
 
 }
