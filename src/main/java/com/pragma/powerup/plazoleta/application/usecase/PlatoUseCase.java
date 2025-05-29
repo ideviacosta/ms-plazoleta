@@ -63,7 +63,7 @@ public class PlatoUseCase implements IPlatoService {
 
     @Override
     public void cambiarEstadoPlato(Long idPlato, boolean habilitar, String rol, Long idPropietario) {
-        validarRol(rol, "PROPIETARIO");
+        validarRol(rol, PROPIETARIO);
 
         if (!restauranteValidationPort.esPropietarioDelPlato(idPlato, idPropietario)) {
             throw new PropietarioInvalidoException(PROPIETARIO_NO_DUENIO_PLATO);
