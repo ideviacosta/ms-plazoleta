@@ -8,6 +8,8 @@ import com.pragma.powerup.plazoleta.domain.spi.IRestauranteValidationPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static com.pragma.powerup.plazoleta.util.MensajesError.PROPIETARIO_NO_DUENIO_PLATO;
+import static com.pragma.powerup.plazoleta.util.Roles.PROPIETARIO;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -99,4 +101,61 @@ class PlatoUseCaseTest {
 
         assertThrows(PropietarioInvalidoException.class, () -> platoUseCase.modificarPlato(1L, 12000, "Desc", "PROPIETARIO", 2L));
     }
+
+    @Test
+    void cambiarEstadoPlato_DeberiaActualizarEstado_SiEsPropietarioValido() {
+        // Arrange
+        Long idPlato = 1L;
+        boolean habilitar = true;
+        String rol = PROPIETARIO;
+        Long idPropietario = 10L;
+
+        when(restauranteValidationPort.esPropietarioDelPlato(idPlato, idPropietario)).thenReturn(true);
+
+        // Act
+        platoUseCase.cambiarEstadoPlato(idPlato, habilitar, rol, idPropietario);
+
+        // Assert
+        verify(persistencePort).cambiarEstadoPlato(idPlato, habilitar);
+    }
+
+    @Test
+    void cambiarEstadoPlato_DeberiaLanzarExcepcion_SiNoEsPropietarioDelPlato() {
+        // Arrange
+        Long idPlato = 1L;
+        boolean habilitar = false;
+        String rol = PROPIETARIO;
+        Long idPropietario = 20L;
+
+        when(restauranteValidationPort.esPropietarioDelPlato(idPlato, idPropietario)).thenReturn(false);
+
+        // Act & Assert
+        PropietarioInvalidoException exception = assertThrows(
+                PropietarioInvalidoException.class,
+                () -> platoUseCase.cambiarEstadoPlato(idPlato, habilitar, rol, idPropietario)
+        );
+
+        assertEquals(PROPIETARIO_NO_DUENIO_PLATO, exception.getMessage());
+        verify(persistencePort, never()).cambiarEstadoPlato(anyLong(), anyBoolean());
+    }
+
+    @Test
+    void cambiarEstadoPlato_DeberiaLanzarExcepcion_SiRolNoEsPropietario() {
+        // Arrange
+        Long idPlato = 1L;
+        boolean habilitar = true;
+        String rol = "EMPLEADO"; // rol no válido
+        Long idPropietario = 10L;
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> platoUseCase.cambiarEstadoPlato(idPlato, habilitar, rol, idPropietario)
+        );
+
+        assertTrue(exception.getMessage().contains("Se requiere rol: PROPIETARIO"));
+        verifyNoInteractions(restauranteValidationPort);
+        verifyNoInteractions(persistencePort);
+    }
+
 }
