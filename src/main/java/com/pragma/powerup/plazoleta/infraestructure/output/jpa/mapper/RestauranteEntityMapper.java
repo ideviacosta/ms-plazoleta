@@ -17,7 +17,7 @@ public class RestauranteEntityMapper {
     }
 
     public static Restaurante toModel(RestauranteEntity e) {
-        Restaurante r = new Restaurante();
+        Restaurante r = Restaurante.builder().build();
         r.setId(e.getId());
         r.setNombre(e.getNombre());
         r.setNit(e.getNit());
@@ -26,5 +26,8 @@ public class RestauranteEntityMapper {
         r.setUrlLogo(e.getUrlLogo());
         r.setIdPropietario(e.getIdPropietario());
         return r;
+    }
+
+    private RestauranteEntityMapper() {
     }
 }

@@ -10,7 +10,16 @@ class PlatoEntityMapperTest {
 
     @Test
     void toEntity_shouldMapCorrectly() {
-        Plato model = new Plato(1L, "Arroz", 12000, "Arroz con pollo", "http://img.com/arroz.jpg", 2L, 3L, true);
+        Plato model = Plato.builder()
+                .id(1L)
+                .nombre("Pizza")
+                .precio(10000)
+                .descripcion("Rica")
+                .urlImagen("img.jpg")
+                .idCategoria(1L)
+                .idRestaurante(2L)
+                .activo(true)
+                .build();
 
         PlatoEntity entity = PlatoEntityMapper.toEntity(model);
 

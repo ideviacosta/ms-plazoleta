@@ -6,15 +6,18 @@ import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoRequestD
 public class PlatoRequestMapper {
 
     public static Plato toModel(PlatoRequestDto dto) {
-        return new Plato(
-                null,
-                dto.getNombre(),
-                dto.getPrecio(),
-                dto.getDescripcion(),
-                dto.getUrlImagen(),
-                dto.getIdCategoria(),
-                dto.getIdRestaurante(),
-                null
-        );
+        Plato plato = Plato.builder().build();
+        plato.setId(null);
+        plato.setNombre(dto.getNombre());
+        plato.setDescripcion(dto.getDescripcion());
+        plato.setPrecio(dto.getPrecio());
+        plato.setUrlImagen(dto.getUrlImagen());
+        plato.setIdCategoria(dto.getIdCategoria());
+        plato.setIdRestaurante(dto.getIdRestaurante());
+        plato.setActivo(null);
+        return plato;
+    }
+
+    private PlatoRequestMapper() {
     }
 }

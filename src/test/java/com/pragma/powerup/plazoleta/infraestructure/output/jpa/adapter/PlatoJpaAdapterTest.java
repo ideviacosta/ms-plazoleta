@@ -25,12 +25,24 @@ class PlatoJpaAdapterTest {
 
     @Test
     void guardarPlato_debeInvocarRepositorySave() {
-        Plato plato = new Plato(null, "Pizza", 12000, "Margarita", "http://img.com", 1L, 1L, true);
+        Plato plato = buildPlatoValido();
         PlatoEntity entity = PlatoEntityMapper.toEntity(plato);
 
         platoJpaAdapter.guardarPlato(plato);
 
         verify(platoRepository, times(1)).save(any(PlatoEntity.class));
+    }
+
+    private Plato buildPlatoValido() {
+        return Plato.builder()
+                .nombre("Pizza")
+                .precio(10000)
+                .descripcion("Rica")
+                .urlImagen("img.jpg")
+                .idCategoria(1L)
+                .idRestaurante(2L)
+                .activo(true)
+                .build();
     }
 
     @Test

@@ -9,7 +9,7 @@ class PlatoTest {
 
     @Test
     void testGettersSettersPlato() {
-        Plato plato = new Plato();
+        Plato plato = Plato.builder().build();
         plato.setNombre("Sopa");
         plato.setPrecio(10000);
         plato.setDescripcion("Casera");

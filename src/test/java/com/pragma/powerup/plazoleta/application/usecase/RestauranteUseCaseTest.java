@@ -4,15 +4,12 @@ import com.pragma.powerup.plazoleta.domain.model.Restaurante;
 import com.pragma.powerup.plazoleta.domain.spi.IRestaurantePersistencePort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class RestauranteUseCaseTest {
 
-    @Qualifier("restauranteJpaAdapter")
     private IRestaurantePersistencePort persistencePort;
     private RestauranteUseCase useCase;
 
@@ -24,7 +21,15 @@ class RestauranteUseCaseTest {
 
     @Test
     void crearRestaurante_deberiaGuardar_siRolEsAdministradorYPropietarioValido() {
-        Restaurante restaurante = new Restaurante(null, "Burgers", "123", "Calle 1", "+573001112233", "logo.png", 1L);
+        Restaurante restaurante = Restaurante.builder()
+                .nombre("Burgers")
+                .nit("123")
+                .direccion("Calle 1")
+                .telefono("+573001112233")
+                .urlLogo("logo.png")
+                .idPropietario(1L)
+                .build();
+
         when(persistencePort.propietarioExisteYEsValido(1L)).thenReturn(true);
 
         assertDoesNotThrow(() -> useCase.crearRestaurante(restaurante, "ADMINISTRADOR"));
@@ -34,7 +39,14 @@ class RestauranteUseCaseTest {
 
     @Test
     void crearRestaurante_lanzaExcepcion_siRolNoEsAdministrador() {
-        Restaurante restaurante = new Restaurante(null, "Burgers", "123", "Calle 1", "+573001112233", "logo.png", 1L);
+        Restaurante restaurante = Restaurante.builder()
+                .nombre("Burgers")
+                .nit("123")
+                .direccion("Calle 1")
+                .telefono("+573001112233")
+                .urlLogo("logo.png")
+                .idPropietario(1L)
+                .build();
 
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> useCase.crearRestaurante(restaurante, "PROPIETARIO"));
@@ -46,7 +58,15 @@ class RestauranteUseCaseTest {
 
     @Test
     void crearRestaurante_lanzaExcepcion_siPropietarioNoEsValido() {
-        Restaurante restaurante = new Restaurante(null, "Burgers", "123", "Calle 1", "+573001112233", "logo.png", 99L);
+        Restaurante restaurante = Restaurante.builder()
+                .nombre("Burgers")
+                .nit("123")
+                .direccion("Calle 1")
+                .telefono("+573001112233")
+                .urlLogo("logo.png")
+                .idPropietario(99L)
+                .build();
+
         when(persistencePort.propietarioExisteYEsValido(99L)).thenReturn(false);
 
         RuntimeException ex = assertThrows(RuntimeException.class,

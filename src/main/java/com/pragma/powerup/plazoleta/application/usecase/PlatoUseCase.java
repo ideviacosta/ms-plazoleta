@@ -6,17 +6,22 @@ import com.pragma.powerup.plazoleta.domain.exception.ValidacionCampoException;
 import com.pragma.powerup.plazoleta.domain.model.Plato;
 import com.pragma.powerup.plazoleta.domain.spi.IPlatoPersistencePort;
 import com.pragma.powerup.plazoleta.domain.spi.IRestauranteValidationPort;
-import lombok.RequiredArgsConstructor;
+
 
 import static com.pragma.powerup.plazoleta.util.MensajesError.*;
 import static com.pragma.powerup.plazoleta.util.RolValidator.*;
 import static com.pragma.powerup.plazoleta.util.Roles.*;
 
-@RequiredArgsConstructor
+
 public class PlatoUseCase implements IPlatoService {
 
     private final IPlatoPersistencePort persistencePort;
     private final IRestauranteValidationPort restauranteValidationPort;
+
+    public PlatoUseCase(IPlatoPersistencePort persistencePort, IRestauranteValidationPort restauranteValidationPort) {
+        this.persistencePort = persistencePort;
+        this.restauranteValidationPort = restauranteValidationPort;
+    }
 
     @Override
     public void crearPlato(Plato plato, String rol, Long idPropietario) {

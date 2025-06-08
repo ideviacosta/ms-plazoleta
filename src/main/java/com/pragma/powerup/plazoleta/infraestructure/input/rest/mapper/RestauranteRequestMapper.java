@@ -6,7 +6,7 @@ import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.RestauranteRe
 public class RestauranteRequestMapper {
 
     public static Restaurante toModel(RestauranteRequestDto dto) {
-        Restaurante r = new Restaurante();
+        Restaurante r = Restaurante.builder().build();
         r.setNombre(dto.getNombre());
         r.setNit(dto.getNit());
         r.setDireccion(dto.getDireccion());
@@ -14,5 +14,7 @@ public class RestauranteRequestMapper {
         r.setUrlLogo(dto.getUrlLogo());
         r.setIdPropietario(dto.getIdPropietario());
         return r;
+    }
+    private RestauranteRequestMapper() {
     }
 }

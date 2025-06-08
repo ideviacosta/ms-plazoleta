@@ -36,7 +36,15 @@ class RestauranteJpaAdapterTest {
 
     @Test
     void guardarRestaurante_guardaEntity() {
-        Restaurante restaurante = new Restaurante(null, "Test", "123", "Calle", "+57", "logo", 1L);
+        Restaurante restaurante = Restaurante.builder()
+                .id(null)
+                .nombre("Burgers")
+                .nit("123")
+                .direccion("Calle 1")
+                .telefono("+573001112233")
+                .urlLogo("logo.png")
+                .idPropietario(1L)
+                .build();
         adapter.guardarRestaurante(restaurante);
         verify(restauranteRepository).save(any());
     }

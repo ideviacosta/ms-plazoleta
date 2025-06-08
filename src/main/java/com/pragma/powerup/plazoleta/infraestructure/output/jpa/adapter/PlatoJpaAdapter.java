@@ -7,7 +7,6 @@ import com.pragma.powerup.plazoleta.infraestructure.output.jpa.entity.PlatoEntit
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.mapper.PlatoEntityMapper;
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.repository.IPlatoRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 import static com.pragma.powerup.plazoleta.util.MensajesError.*;

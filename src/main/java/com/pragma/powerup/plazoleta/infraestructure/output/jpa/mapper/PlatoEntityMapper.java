@@ -19,15 +19,16 @@ public class PlatoEntityMapper {
     }
 
     public static Plato toModel(PlatoEntity entity) {
-        return new Plato(
-                entity.getId(),
-                entity.getNombre(),
-                entity.getPrecio(),
-                entity.getDescripcion(),
-                entity.getUrlImagen(),
-                entity.getIdCategoria(),
-                entity.getIdRestaurante(),
-                entity.getActivo()
-        );
+        Plato plato = Plato.builder().build();
+        plato.setId(entity.getId());
+        plato.setNombre(entity.getNombre());
+        plato.setPrecio(entity.getPrecio());
+        plato.setDescripcion(entity.getDescripcion());
+        plato.setUrlImagen(entity.getUrlImagen());
+        plato.setIdCategoria(entity.getIdCategoria());
+        plato.setIdRestaurante(entity.getIdRestaurante());
+        plato.setActivo(entity.getActivo());
+        return plato;
     }
+    private PlatoEntityMapper() {}
 }

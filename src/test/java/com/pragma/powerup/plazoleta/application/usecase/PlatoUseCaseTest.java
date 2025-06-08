@@ -26,9 +26,21 @@ class PlatoUseCaseTest {
         platoUseCase = new PlatoUseCase(persistencePort, restauranteValidationPort);
     }
 
+    private Plato buildPlatoValido() {
+        return Plato.builder()
+                .nombre("Pizza")
+                .precio(10000)
+                .descripcion("Rica")
+                .urlImagen("img.jpg")
+                .idCategoria(1L)
+                .idRestaurante(2L)
+                .activo(true)
+                .build();
+    }
+
     @Test
     void crearPlato_ok() {
-        Plato plato = new Plato(null, "Pizza",  10000, "Rica","img.jpg", 1L, 2L, true);
+        Plato plato = buildPlatoValido();
         when(restauranteValidationPort.esPropietarioDelRestaurante(10L, 2L)).thenReturn(true);
 
         assertDoesNotThrow(() -> platoUseCase.crearPlato(plato, "PROPIETARIO", 10L));
@@ -37,14 +49,14 @@ class PlatoUseCaseTest {
 
     @Test
     void crearPlato_lanzaExcepcionSiRolInvalido() {
-        Plato plato = new Plato();
+        Plato plato = buildPlatoValido();
         Exception ex = assertThrows(RuntimeException.class, () -> platoUseCase.crearPlato(plato, "ADMIN", 1L));
         assertTrue(ex.getMessage().contains("Se requiere rol: PROPIETARIO"));
     }
 
     @Test
     void crearPlato_lanzaExcepcionSiNoEsPropietario() {
-        Plato plato = new Plato(null, "Pizza",  10000, "Rica","img.jpg", 1L, 2L, true);
+        Plato plato = buildPlatoValido();
         when(restauranteValidationPort.esPropietarioDelRestaurante(99L, 2L)).thenReturn(false);
 
         assertThrows(PropietarioInvalidoException.class, () -> platoUseCase.crearPlato(plato, "PROPIETARIO", 99L));
@@ -52,29 +64,30 @@ class PlatoUseCaseTest {
 
     @Test
     void crearPlato_lanzaExcepcionSiPrecioInvalido() {
-        Plato plato = new Plato(1L, "Arroz", 0, "Descripción", "url", 1L, 1L, true);
+        Plato plato = Plato.builder().nombre("Arroz").precio(0).descripcion("Descripción")
+                .urlImagen("url").idCategoria(1L).idRestaurante(1L).activo(true).build();
         when(restauranteValidationPort.esPropietarioDelRestaurante(eq(1L), eq(1L))).thenReturn(true);
-        assertThrows(ValidacionCampoException.class, () ->
-                platoUseCase.crearPlato(plato, "PROPIETARIO", 1L)
-        );  }
+
+        assertThrows(ValidacionCampoException.class, () -> platoUseCase.crearPlato(plato, "PROPIETARIO", 1L));
+    }
 
     @Test
     void crearPlato_lanzaExcepcionSiCamposObligatoriosFaltan() {
-        Plato plato = new Plato(1L, "", 20000, "", "", 1L, 1L, true);
+        Plato plato = Plato.builder().nombre("").precio(20000).descripcion("").urlImagen("")
+                .idCategoria(1L).idRestaurante(1L).activo(true).build();
         when(restauranteValidationPort.esPropietarioDelRestaurante(eq(1L), eq(1L))).thenReturn(true);
 
-        assertThrows(ValidacionCampoException.class, () ->
-                platoUseCase.crearPlato(plato, "PROPIETARIO", 1L)
-        );   }
+        assertThrows(ValidacionCampoException.class, () -> platoUseCase.crearPlato(plato, "PROPIETARIO", 1L));
+    }
 
     @Test
     void crearPlato_lanzaExcepcionSiCategoriaNula() {
-        Plato plato = new Plato(1L, "Arroz",15000 , "Rico", "url", null, 1L, true);
+        Plato plato = Plato.builder().nombre("Arroz").precio(15000).descripcion("Rico").urlImagen("url")
+                .idCategoria(null).idRestaurante(1L).activo(true).build();
         when(restauranteValidationPort.esPropietarioDelRestaurante(eq(1L), eq(1L))).thenReturn(true);
 
-        assertThrows(ValidacionCampoException.class, () ->
-                platoUseCase.crearPlato(plato, "PROPIETARIO", 1L)
-        );   }
+        assertThrows(ValidacionCampoException.class, () -> platoUseCase.crearPlato(plato, "PROPIETARIO", 1L));
+    }
 
     @Test
     void modificarPlato_ok() {
@@ -98,41 +111,31 @@ class PlatoUseCaseTest {
     @Test
     void modificarPlato_lanzaExcepcionSiNoEsPropietarioDelPlato() {
         when(restauranteValidationPort.esPropietarioDelPlato(1L, 2L)).thenReturn(false);
-
         assertThrows(PropietarioInvalidoException.class, () -> platoUseCase.modificarPlato(1L, 12000, "Desc", "PROPIETARIO", 2L));
     }
 
     @Test
     void cambiarEstadoPlato_DeberiaActualizarEstado_SiEsPropietarioValido() {
-        // Arrange
         Long idPlato = 1L;
         boolean habilitar = true;
-        String rol = PROPIETARIO;
         Long idPropietario = 10L;
-
         when(restauranteValidationPort.esPropietarioDelPlato(idPlato, idPropietario)).thenReturn(true);
 
-        // Act
-        platoUseCase.cambiarEstadoPlato(idPlato, habilitar, rol, idPropietario);
+        platoUseCase.cambiarEstadoPlato(idPlato, habilitar, PROPIETARIO, idPropietario);
 
-        // Assert
         verify(persistencePort).cambiarEstadoPlato(idPlato, habilitar);
     }
 
     @Test
     void cambiarEstadoPlato_DeberiaLanzarExcepcion_SiNoEsPropietarioDelPlato() {
-        // Arrange
         Long idPlato = 1L;
         boolean habilitar = false;
-        String rol = PROPIETARIO;
         Long idPropietario = 20L;
-
         when(restauranteValidationPort.esPropietarioDelPlato(idPlato, idPropietario)).thenReturn(false);
 
-        // Act & Assert
         PropietarioInvalidoException exception = assertThrows(
                 PropietarioInvalidoException.class,
-                () -> platoUseCase.cambiarEstadoPlato(idPlato, habilitar, rol, idPropietario)
+                () -> platoUseCase.cambiarEstadoPlato(idPlato, habilitar, PROPIETARIO, idPropietario)
         );
 
         assertEquals(PROPIETARIO_NO_DUENIO_PLATO, exception.getMessage());
@@ -141,13 +144,11 @@ class PlatoUseCaseTest {
 
     @Test
     void cambiarEstadoPlato_DeberiaLanzarExcepcion_SiRolNoEsPropietario() {
-        // Arrange
         Long idPlato = 1L;
         boolean habilitar = true;
-        String rol = "EMPLEADO"; // rol no válido
+        String rol = "EMPLEADO";
         Long idPropietario = 10L;
 
-        // Act & Assert
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
                 () -> platoUseCase.cambiarEstadoPlato(idPlato, habilitar, rol, idPropietario)
@@ -157,5 +158,4 @@ class PlatoUseCaseTest {
         verifyNoInteractions(restauranteValidationPort);
         verifyNoInteractions(persistencePort);
     }
-
 }
