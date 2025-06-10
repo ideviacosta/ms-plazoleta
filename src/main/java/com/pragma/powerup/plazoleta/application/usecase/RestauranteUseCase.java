@@ -5,6 +5,8 @@ import com.pragma.powerup.plazoleta.domain.exception.PropietarioInvalidoExceptio
 import com.pragma.powerup.plazoleta.domain.model.Restaurante;
 import com.pragma.powerup.plazoleta.domain.spi.IRestaurantePersistencePort;
 
+import java.util.List;
+
 import static com.pragma.powerup.plazoleta.util.MensajesError.*;
 import static com.pragma.powerup.plazoleta.util.RolValidator.*;
 import static com.pragma.powerup.plazoleta.util.Roles.*;
@@ -28,4 +30,11 @@ public class RestauranteUseCase implements IRestauranteService {
 
         persistencePort.guardarRestaurante(restaurante);
     }
+
+    @Override
+    public List<Restaurante> listarRestaurantes(int page, int size, String rol) {
+        validarRol(rol, CLIENTE);
+        return persistencePort.obtenerRestaurantesOrdenados(page, size).getContent();
+    }
+
 }

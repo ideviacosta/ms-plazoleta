@@ -4,6 +4,9 @@ import com.pragma.powerup.plazoleta.domain.model.Restaurante;
 import com.pragma.powerup.plazoleta.domain.spi.IRestaurantePersistencePort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageImpl;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -75,4 +78,37 @@ class RestauranteUseCaseTest {
         assertEquals("Propietario inválido: no existe o no tiene rol PROPIETARIO", ex.getMessage());
         verify(persistencePort, never()).guardarRestaurante(any());
     }
+
+    @Test
+    void listarRestaurantes_deberiaRetornarListaOrdenada_siRolEsCliente() {
+        // Arrange
+        Restaurante r1 = Restaurante.builder().nombre("Arepas").urlLogo("url1").build();
+        Restaurante r2 = Restaurante.builder().nombre("Burgers").urlLogo("url2").build();
+        List<Restaurante> mockList = List.of(r1, r2);
+
+        when(persistencePort.obtenerRestaurantesOrdenados(0, 2))
+                .thenReturn(new PageImpl<>(mockList));
+
+        // Act
+        List<Restaurante> resultado = useCase.listarRestaurantes(0, 2, "CLIENTE");
+
+        // Assert
+        assertEquals(2, resultado.size());
+        assertEquals("Arepas", resultado.get(0).getNombre());
+        assertEquals("Burgers", resultado.get(1).getNombre());
+    }
+
+    @Test
+    void listarRestaurantes_deberiaLanzarExcepcion_siRolNoEsCliente() {
+        // Arrange
+        String rolNoCliente = "EMPLEADO";
+
+        // Act & Assert
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> useCase.listarRestaurantes(0, 5, rolNoCliente));
+
+        assertTrue(ex.getMessage().contains("Se requiere rol: CLIENTE"));
+        verify(persistencePort, never()).obtenerRestaurantesOrdenados(anyInt(), anyInt());
+    }
+
 }

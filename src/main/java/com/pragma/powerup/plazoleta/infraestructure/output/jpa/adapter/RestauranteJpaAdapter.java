@@ -7,6 +7,10 @@ import com.pragma.powerup.plazoleta.infraestructure.output.jpa.mapper.Restaurant
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.repository.IRestauranteRepository;
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente.UsuarioRestClient;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @RequiredArgsConstructor
 public class RestauranteJpaAdapter implements IRestaurantePersistencePort, IRestauranteValidationPort
@@ -48,5 +52,13 @@ public class RestauranteJpaAdapter implements IRestaurantePersistencePort, IRest
      public boolean esPropietarioDelPlato(Long idPlato, Long idPropietario) {
          return restauranteRepository.existsByIdAndIdPropietario(idPlato, idPropietario);
      }
+
+     @Override
+     public Page<Restaurante> obtenerRestaurantesOrdenados(int page, int size) {
+         Pageable pageable = PageRequest.of(page, size, Sort.by("nombre").ascending());
+         return restauranteRepository.findAllByOrderByNombreAsc(pageable)
+                 .map(RestauranteEntityMapper::toModel);
+     }
+
 
  }

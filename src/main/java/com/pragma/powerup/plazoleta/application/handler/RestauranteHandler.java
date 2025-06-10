@@ -2,9 +2,12 @@ package com.pragma.powerup.plazoleta.application.handler;
 
 import com.pragma.powerup.plazoleta.domain.api.IRestauranteService;
 import com.pragma.powerup.plazoleta.domain.model.Restaurante;
+import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.RestauranteListadoResponseDto;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.RestauranteRequestDto;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.mapper.RestauranteRequestMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class RestauranteHandler implements IRestauranteHandler {
@@ -20,4 +23,13 @@ public class RestauranteHandler implements IRestauranteHandler {
         Restaurante restaurante = RestauranteRequestMapper.toModel(dto);
         restauranteService.crearRestaurante(restaurante, rolCreador);
     }
+
+    @Override
+    public List<RestauranteListadoResponseDto> listarRestaurantes(int page, int size, String rol) {
+        List<Restaurante> restaurantes = restauranteService.listarRestaurantes(page, size, rol);
+        return restaurantes.stream()
+                .map(r -> new RestauranteListadoResponseDto(r.getNombre(), r.getUrlLogo()))
+                .toList();
+    }
+
 }
