@@ -32,4 +32,6 @@ public class PlatoEntity {
     private Long idRestaurante;
 
     private Boolean activo;
+
+    public static final String CAMPO_NOMBRE = "nombre";
 }

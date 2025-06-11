@@ -1,10 +1,12 @@
 package com.pragma.powerup.plazoleta.application.handler;
 
 import com.pragma.powerup.plazoleta.domain.api.IPlatoService;
+import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoListadoResponseDto;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoRequestDto;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoUpdateRequestDto;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.mapper.PlatoRequestMapper;
 
+import java.util.List;
 
 
 public class PlatoHandler implements IPlatoHandler {
@@ -33,6 +35,13 @@ public class PlatoHandler implements IPlatoHandler {
     @Override
     public void cambiarEstadoPlato(Long idPlato, boolean habilitar, String rol, Long idPropietario) {
         platoService.cambiarEstadoPlato(idPlato, habilitar, rol, idPropietario);
+    }
+
+    @Override
+    public List<PlatoListadoResponseDto> listarPlatosPorRestaurante(Long idRestaurante, Long idCategoria, int page, int size, String rol) {
+        return platoService.listarPlatosPorRestaurante(idRestaurante, idCategoria, page, size, rol).stream()
+                .map(p -> new PlatoListadoResponseDto(p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getUrlImagen()))
+                .toList();
     }
 
 

@@ -8,6 +8,8 @@ import com.pragma.powerup.plazoleta.domain.spi.IRestauranteValidationPort;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static com.pragma.powerup.plazoleta.util.MensajesError.PROPIETARIO_NO_DUENIO_PLATO;
 import static com.pragma.powerup.plazoleta.util.Roles.PROPIETARIO;
 import static org.junit.jupiter.api.Assertions.*;
@@ -156,6 +158,65 @@ class PlatoUseCaseTest {
 
         assertTrue(exception.getMessage().contains("Se requiere rol: PROPIETARIO"));
         verifyNoInteractions(restauranteValidationPort);
+        verifyNoInteractions(persistencePort);
+    }
+
+    @Test
+    void listarPlatosPorRestauranteYCategoria_ok() {
+        // Arrange
+        Long idRestaurante = 1L;
+        Long idCategoria = 2L;
+        int page = 0;
+        int size = 5;
+        String rol = "CLIENTE";
+
+        List<Plato> mockLista = List.of(
+                Plato.builder().id(1L).nombre("Arroz").build(),
+                Plato.builder().id(2L).nombre("Pollo").build()
+        );
+
+        when(persistencePort.listarPlatosPorRestaurante(idRestaurante, idCategoria, page, size))
+                .thenReturn(mockLista);
+
+        // Act
+        List<Plato> resultado = platoUseCase.listarPlatosPorRestaurante(idRestaurante, idCategoria, page, size, rol);
+
+        // Assert
+        assertNotNull(resultado);
+        assertEquals(2, resultado.size());
+        verify(persistencePort).listarPlatosPorRestaurante(idRestaurante, idCategoria, page, size);
+    }
+
+    @Test
+    void listarPlatosPorRestaurante_sinCategoria_ok() {
+        Long idRestaurante = 1L;
+        Long idCategoria = null;
+        int page = 1;
+        int size = 3;
+        String rol = "CLIENTE";
+
+        List<Plato> mockLista = List.of(Plato.builder().id(1L).nombre("Ensalada").build());
+
+        when(persistencePort.listarPlatosPorRestaurante(idRestaurante, null, page, size)).thenReturn(mockLista);
+
+        List<Plato> resultado = platoUseCase.listarPlatosPorRestaurante(idRestaurante, idCategoria, page, size, rol);
+
+        assertEquals(1, resultado.size());
+        verify(persistencePort).listarPlatosPorRestaurante(idRestaurante, null, page, size);
+    }
+
+    @Test
+    void listarPlatosPorRestaurante_rolInvalido_lanzaExcepcion() {
+        Long idRestaurante = 1L;
+        Long idCategoria = null;
+        int page = 0;
+        int size = 5;
+        String rol = "PROPIETARIO";
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> platoUseCase.listarPlatosPorRestaurante(idRestaurante, idCategoria, page, size, rol));
+
+        assertTrue(ex.getMessage().contains("Se requiere rol: CLIENTE"));
         verifyNoInteractions(persistencePort);
     }
 }

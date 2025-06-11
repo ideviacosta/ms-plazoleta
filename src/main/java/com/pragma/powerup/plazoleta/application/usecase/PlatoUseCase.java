@@ -8,6 +8,8 @@ import com.pragma.powerup.plazoleta.domain.spi.IPlatoPersistencePort;
 import com.pragma.powerup.plazoleta.domain.spi.IRestauranteValidationPort;
 
 
+import java.util.List;
+
 import static com.pragma.powerup.plazoleta.util.MensajesError.*;
 import static com.pragma.powerup.plazoleta.util.RolValidator.*;
 import static com.pragma.powerup.plazoleta.util.Roles.*;
@@ -77,4 +79,9 @@ public class PlatoUseCase implements IPlatoService {
         persistencePort.cambiarEstadoPlato(idPlato, habilitar);
     }
 
+    @Override
+    public List<Plato> listarPlatosPorRestaurante(Long idRestaurante, Long idCategoria, int page, int size, String rol) {
+        validarRol(rol, CLIENTE);
+        return persistencePort.listarPlatosPorRestaurante(idRestaurante, idCategoria, page, size);
+    }
 }

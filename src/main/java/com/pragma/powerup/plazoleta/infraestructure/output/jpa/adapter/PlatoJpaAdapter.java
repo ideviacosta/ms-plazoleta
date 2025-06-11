@@ -7,7 +7,12 @@ import com.pragma.powerup.plazoleta.infraestructure.output.jpa.entity.PlatoEntit
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.mapper.PlatoEntityMapper;
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.repository.IPlatoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
+import java.util.List;
 import java.util.Optional;
 import static com.pragma.powerup.plazoleta.util.MensajesError.*;
 
@@ -43,5 +48,17 @@ public class PlatoJpaAdapter implements IPlatoPersistencePort {
         platoRepository.save(plato);
     }
 
+    @Override
+    public List<Plato> listarPlatosPorRestaurante(Long idRestaurante, Long idCategoria, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(PlatoEntity.CAMPO_NOMBRE).ascending());
+
+        Page<PlatoEntity> pageResult = (idCategoria != null)
+                ? platoRepository.findByIdRestauranteAndIdCategoria(idRestaurante, idCategoria, pageable)
+                : platoRepository.findByIdRestaurante(idRestaurante, pageable);
+
+        return pageResult.stream()
+                .map(PlatoEntityMapper::toModel)
+                .toList();
+    }
 
 }

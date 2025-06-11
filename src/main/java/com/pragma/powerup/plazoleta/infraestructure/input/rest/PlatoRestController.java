@@ -1,7 +1,9 @@
 package com.pragma.powerup.plazoleta.infraestructure.input.rest;
 
 import com.pragma.powerup.plazoleta.application.handler.IPlatoHandler;
+import com.pragma.powerup.plazoleta.domain.model.Plato;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoEstadoRequestDto;
+import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoListadoResponseDto;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoRequestDto;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoUpdateRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +16,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/platos")
@@ -69,5 +73,24 @@ public class PlatoRestController {
 
         platoHandler.cambiarEstadoPlato(idPlato, dto.isHabilitar(), rol, idPropietario);
     }
+
+    @Operation(summary = "Listar platos de restaurante", security = @SecurityRequirement(name = "BearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista obtenida"),
+            @ApiResponse(responseCode = "403", description = "Rol no autorizado")
+    })
+    @GetMapping("/restaurantes/{idRestaurante}/platos")
+    public List<PlatoListadoResponseDto> listarPlatosPorRestaurante(
+            @PathVariable Long idRestaurante,
+            @RequestParam(required = false) Long idCategoria,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            HttpServletRequest request
+    ) {
+        String rol = (String) request.getAttribute("rol");
+        return platoHandler.listarPlatosPorRestaurante(idRestaurante, idCategoria, page, size, rol);
+    }
+
+
 
 }
