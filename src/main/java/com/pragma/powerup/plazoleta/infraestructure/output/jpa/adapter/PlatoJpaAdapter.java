@@ -1,6 +1,7 @@
 package com.pragma.powerup.plazoleta.infraestructure.output.jpa.adapter;
 
 import com.pragma.powerup.plazoleta.domain.exception.PlatoNoExiste;
+import com.pragma.powerup.plazoleta.domain.model.PaginaRespuesta;
 import com.pragma.powerup.plazoleta.domain.model.Plato;
 import com.pragma.powerup.plazoleta.domain.spi.IPlatoPersistencePort;
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.entity.PlatoEntity;
@@ -49,16 +50,25 @@ public class PlatoJpaAdapter implements IPlatoPersistencePort {
     }
 
     @Override
-    public List<Plato> listarPlatosPorRestaurante(Long idRestaurante, Long idCategoria, int page, int size) {
+    public PaginaRespuesta<Plato> listarPlatosPorRestaurante(Long idRestaurante, Long idCategoria, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(PlatoEntity.CAMPO_NOMBRE).ascending());
 
         Page<PlatoEntity> pageResult = (idCategoria != null)
                 ? platoRepository.findByIdRestauranteAndIdCategoria(idRestaurante, idCategoria, pageable)
                 : platoRepository.findByIdRestaurante(idRestaurante, pageable);
 
-        return pageResult.stream()
+        List<Plato> contenido = pageResult.stream()
                 .map(PlatoEntityMapper::toModel)
                 .toList();
+
+        return new PaginaRespuesta<>(
+                contenido,
+                pageResult.getNumber(),
+                pageResult.getTotalPages(),
+                pageResult.getTotalElements(),
+                pageResult.getSize()
+        );
     }
+
 
 }

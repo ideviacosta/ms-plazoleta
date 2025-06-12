@@ -1,5 +1,6 @@
 package com.pragma.powerup.plazoleta.application.usecase;
 
+import com.pragma.powerup.plazoleta.domain.model.PaginaRespuesta;
 import com.pragma.powerup.plazoleta.domain.model.Restaurante;
 import com.pragma.powerup.plazoleta.domain.spi.IRestaurantePersistencePort;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,18 +85,29 @@ class RestauranteUseCaseTest {
         // Arrange
         Restaurante r1 = Restaurante.builder().nombre("Arepas").urlLogo("url1").build();
         Restaurante r2 = Restaurante.builder().nombre("Burgers").urlLogo("url2").build();
-        List<Restaurante> mockList = List.of(r1, r2);
+        List<Restaurante> mockContenido = List.of(r1, r2);
 
-        when(persistencePort.obtenerRestaurantesOrdenados(0, 2))
-                .thenReturn(new PageImpl<>(mockList));
+        PaginaRespuesta<Restaurante> paginaMock = new PaginaRespuesta<>(
+                mockContenido,
+                0, // página actual
+                1, // total páginas
+                2, // total elementos
+                2  // elementos por página
+        );
+
+        when(persistencePort.obtenerRestaurantesOrdenados(0, 2)).thenReturn(paginaMock);
 
         // Act
-        List<Restaurante> resultado = useCase.listarRestaurantes(0, 2, "CLIENTE");
+        PaginaRespuesta<Restaurante> resultado = useCase.listarRestaurantes(0, 2, "CLIENTE");
 
         // Assert
-        assertEquals(2, resultado.size());
-        assertEquals("Arepas", resultado.get(0).getNombre());
-        assertEquals("Burgers", resultado.get(1).getNombre());
+        assertEquals(2, resultado.getTotalElementos());
+        assertEquals(0, resultado.getPaginaActual());
+        assertEquals(1, resultado.getTotalPaginas());
+        assertEquals(2, resultado.getElementosPorPagina());
+
+        assertEquals("Arepas", resultado.getContenido().get(0).getNombre());
+        assertEquals("Burgers", resultado.getContenido().get(1).getNombre());
     }
 
     @Test
@@ -110,5 +122,6 @@ class RestauranteUseCaseTest {
         assertTrue(ex.getMessage().contains("Se requiere rol: CLIENTE"));
         verify(persistencePort, never()).obtenerRestaurantesOrdenados(anyInt(), anyInt());
     }
+
 
 }

@@ -1,6 +1,8 @@
 package com.pragma.powerup.plazoleta.application.handler;
 
 import com.pragma.powerup.plazoleta.domain.api.IPlatoService;
+import com.pragma.powerup.plazoleta.domain.model.PaginaRespuesta;
+import com.pragma.powerup.plazoleta.domain.model.Plato;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoListadoResponseDto;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoRequestDto;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoUpdateRequestDto;
@@ -38,11 +40,21 @@ public class PlatoHandler implements IPlatoHandler {
     }
 
     @Override
-    public List<PlatoListadoResponseDto> listarPlatosPorRestaurante(Long idRestaurante, Long idCategoria, int page, int size, String rol) {
-        return platoService.listarPlatosPorRestaurante(idRestaurante, idCategoria, page, size, rol).stream()
+    public PaginaRespuesta<PlatoListadoResponseDto> listarPlatosPorRestaurante(Long idRestaurante, Long idCategoria, int page, int size, String rol) {
+        PaginaRespuesta<Plato> pagina = platoService.listarPlatosPorRestaurante(idRestaurante, idCategoria, page, size, rol);
+        List<PlatoListadoResponseDto> contenido = pagina.getContenido().stream()
                 .map(p -> new PlatoListadoResponseDto(p.getNombre(), p.getDescripcion(), p.getPrecio(), p.getUrlImagen()))
                 .toList();
+
+        return new PaginaRespuesta<>(
+                contenido,
+                pagina.getPaginaActual(),
+                pagina.getTotalPaginas(),
+                pagina.getTotalElementos(),
+                pagina.getElementosPorPagina()
+        );
     }
+
 
 
 }

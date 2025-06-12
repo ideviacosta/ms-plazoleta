@@ -2,6 +2,7 @@ package com.pragma.powerup.plazoleta.application.usecase;
 
 import com.pragma.powerup.plazoleta.domain.exception.PropietarioInvalidoException;
 import com.pragma.powerup.plazoleta.domain.exception.ValidacionCampoException;
+import com.pragma.powerup.plazoleta.domain.model.PaginaRespuesta;
 import com.pragma.powerup.plazoleta.domain.model.Plato;
 import com.pragma.powerup.plazoleta.domain.spi.IPlatoPersistencePort;
 import com.pragma.powerup.plazoleta.domain.spi.IRestauranteValidationPort;
@@ -170,53 +171,73 @@ class PlatoUseCaseTest {
         int size = 5;
         String rol = "CLIENTE";
 
-        List<Plato> mockLista = List.of(
+        List<Plato> mockContenido = List.of(
                 Plato.builder().id(1L).nombre("Arroz").build(),
                 Plato.builder().id(2L).nombre("Pollo").build()
         );
 
+        PaginaRespuesta<Plato> paginaMock = new PaginaRespuesta<>(
+                mockContenido, page, 1, mockContenido.size(), size
+        );
+
         when(persistencePort.listarPlatosPorRestaurante(idRestaurante, idCategoria, page, size))
-                .thenReturn(mockLista);
+                .thenReturn(paginaMock);
 
         // Act
-        List<Plato> resultado = platoUseCase.listarPlatosPorRestaurante(idRestaurante, idCategoria, page, size, rol);
+        PaginaRespuesta<Plato> resultado = platoUseCase.listarPlatosPorRestaurante(idRestaurante, idCategoria, page, size, rol);
 
         // Assert
         assertNotNull(resultado);
-        assertEquals(2, resultado.size());
+        assertEquals(2, resultado.getContenido().size());
+        assertEquals("Arroz", resultado.getContenido().get(0).getNombre());
+        assertEquals(0, resultado.getPaginaActual());
         verify(persistencePort).listarPlatosPorRestaurante(idRestaurante, idCategoria, page, size);
     }
 
     @Test
     void listarPlatosPorRestaurante_sinCategoria_ok() {
+        // Arrange
         Long idRestaurante = 1L;
         Long idCategoria = null;
         int page = 1;
         int size = 3;
         String rol = "CLIENTE";
 
-        List<Plato> mockLista = List.of(Plato.builder().id(1L).nombre("Ensalada").build());
+        List<Plato> mockContenido = List.of(
+                Plato.builder().id(1L).nombre("Ensalada").build()
+        );
 
-        when(persistencePort.listarPlatosPorRestaurante(idRestaurante, null, page, size)).thenReturn(mockLista);
+        PaginaRespuesta<Plato> paginaMock = new PaginaRespuesta<>(
+                mockContenido, page, 1, 1, size
+        );
 
-        List<Plato> resultado = platoUseCase.listarPlatosPorRestaurante(idRestaurante, idCategoria, page, size, rol);
+        when(persistencePort.listarPlatosPorRestaurante(idRestaurante, null, page, size))
+                .thenReturn(paginaMock);
 
-        assertEquals(1, resultado.size());
+        // Act
+        PaginaRespuesta<Plato> resultado = platoUseCase.listarPlatosPorRestaurante(idRestaurante, idCategoria, page, size, rol);
+
+        // Assert
+        assertEquals(1, resultado.getContenido().size());
+        assertEquals("Ensalada", resultado.getContenido().get(0).getNombre());
         verify(persistencePort).listarPlatosPorRestaurante(idRestaurante, null, page, size);
     }
 
     @Test
     void listarPlatosPorRestaurante_rolInvalido_lanzaExcepcion() {
+        // Arrange
         Long idRestaurante = 1L;
         Long idCategoria = null;
         int page = 0;
         int size = 5;
         String rol = "PROPIETARIO";
 
+        // Act & Assert
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> platoUseCase.listarPlatosPorRestaurante(idRestaurante, idCategoria, page, size, rol));
 
         assertTrue(ex.getMessage().contains("Se requiere rol: CLIENTE"));
         verifyNoInteractions(persistencePort);
     }
+
 }

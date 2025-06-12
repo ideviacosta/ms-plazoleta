@@ -1,6 +1,7 @@
 package com.pragma.powerup.plazoleta.infraestructure.input.rest;
 
 import com.pragma.powerup.plazoleta.application.handler.IRestauranteHandler;
+import com.pragma.powerup.plazoleta.domain.model.PaginaRespuesta;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.RestauranteListadoResponseDto;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.RestauranteRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,7 +45,7 @@ public class RestauranteRestController {
             @ApiResponse(responseCode = "200", description = "Lista obtenida"),
             @ApiResponse(responseCode = "403", description = "Rol no autorizado")
     })
-    public List<RestauranteListadoResponseDto> listarRestaurantes(
+    public PaginaRespuesta<RestauranteListadoResponseDto> listarRestaurantes(
             @RequestParam(name = "pagina", defaultValue = "0") int page,
             @RequestParam(name = "tamanio", defaultValue = "10") int size,
             HttpServletRequest request) {

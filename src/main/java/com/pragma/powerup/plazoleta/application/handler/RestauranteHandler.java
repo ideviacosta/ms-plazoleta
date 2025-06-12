@@ -1,6 +1,7 @@
 package com.pragma.powerup.plazoleta.application.handler;
 
 import com.pragma.powerup.plazoleta.domain.api.IRestauranteService;
+import com.pragma.powerup.plazoleta.domain.model.PaginaRespuesta;
 import com.pragma.powerup.plazoleta.domain.model.Restaurante;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.RestauranteListadoResponseDto;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.RestauranteRequestDto;
@@ -25,11 +26,18 @@ public class RestauranteHandler implements IRestauranteHandler {
     }
 
     @Override
-    public List<RestauranteListadoResponseDto> listarRestaurantes(int page, int size, String rol) {
-        List<Restaurante> restaurantes = restauranteService.listarRestaurantes(page, size, rol);
-        return restaurantes.stream()
+    public PaginaRespuesta<RestauranteListadoResponseDto> listarRestaurantes(int page, int size, String rol) {
+        PaginaRespuesta<Restaurante> pagina = restauranteService.listarRestaurantes(page, size, rol);
+        List<RestauranteListadoResponseDto> contenido = pagina.getContenido().stream()
                 .map(r -> new RestauranteListadoResponseDto(r.getNombre(), r.getUrlLogo()))
                 .toList();
-    }
 
+        return new PaginaRespuesta<>(
+                contenido,
+                pagina.getPaginaActual(),
+                pagina.getTotalPaginas(),
+                pagina.getTotalElementos(),
+                pagina.getElementosPorPagina()
+        );
+    }
 }

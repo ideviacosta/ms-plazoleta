@@ -3,6 +3,7 @@ package com.pragma.powerup.plazoleta.application.usecase;
 import com.pragma.powerup.plazoleta.domain.api.IPlatoService;
 import com.pragma.powerup.plazoleta.domain.exception.PropietarioInvalidoException;
 import com.pragma.powerup.plazoleta.domain.exception.ValidacionCampoException;
+import com.pragma.powerup.plazoleta.domain.model.PaginaRespuesta;
 import com.pragma.powerup.plazoleta.domain.model.Plato;
 import com.pragma.powerup.plazoleta.domain.spi.IPlatoPersistencePort;
 import com.pragma.powerup.plazoleta.domain.spi.IRestauranteValidationPort;
@@ -80,8 +81,9 @@ public class PlatoUseCase implements IPlatoService {
     }
 
     @Override
-    public List<Plato> listarPlatosPorRestaurante(Long idRestaurante, Long idCategoria, int page, int size, String rol) {
+    public PaginaRespuesta<Plato> listarPlatosPorRestaurante(Long idRestaurante, Long idCategoria, int page, int size, String rol) {
         validarRol(rol, CLIENTE);
         return persistencePort.listarPlatosPorRestaurante(idRestaurante, idCategoria, page, size);
     }
+
 }

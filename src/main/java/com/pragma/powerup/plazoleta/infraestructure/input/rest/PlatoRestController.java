@@ -1,6 +1,7 @@
 package com.pragma.powerup.plazoleta.infraestructure.input.rest;
 
 import com.pragma.powerup.plazoleta.application.handler.IPlatoHandler;
+import com.pragma.powerup.plazoleta.domain.model.PaginaRespuesta;
 import com.pragma.powerup.plazoleta.domain.model.Plato;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoEstadoRequestDto;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoListadoResponseDto;
@@ -80,7 +81,7 @@ public class PlatoRestController {
             @ApiResponse(responseCode = "403", description = "Rol no autorizado")
     })
     @GetMapping("/restaurantes/{idRestaurante}/platos")
-    public List<PlatoListadoResponseDto> listarPlatosPorRestaurante(
+    public PaginaRespuesta<PlatoListadoResponseDto> listarPlatosPorRestaurante(
             @PathVariable Long idRestaurante,
             @RequestParam(required = false) Long idCategoria,
             @RequestParam(defaultValue = "0") int page,
