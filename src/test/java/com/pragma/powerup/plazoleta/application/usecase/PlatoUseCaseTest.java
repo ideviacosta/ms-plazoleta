@@ -239,6 +239,5 @@ class PlatoUseCaseTest {
         assertTrue(ex.getMessage().contains("Se requiere rol: CLIENTE"));
         verifyNoInteractions(persistencePort);
     }
-
-    +
+    
 }
