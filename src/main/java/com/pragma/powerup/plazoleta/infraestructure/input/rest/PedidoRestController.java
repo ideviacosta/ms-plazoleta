@@ -1,7 +1,10 @@
 package com.pragma.powerup.plazoleta.infraestructure.input.rest;
 
 import com.pragma.powerup.plazoleta.application.handler.IPedidoHandler;
+import com.pragma.powerup.plazoleta.domain.model.EstadoPedido;
+import com.pragma.powerup.plazoleta.domain.model.PaginaRespuesta;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PedidoRequestDto;
+import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PedidoResponseDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -50,6 +53,19 @@ public class PedidoRestController {
         String rol = (String) request.getAttribute("rol");
         Long idEmpleado = (Long) request.getAttribute("idUsuario");
         pedidoHandler.asignarPedido(idPedido, idEmpleado, rol);
+    }
+
+    @GetMapping
+    @Operation(summary = "Listar pedidos por estado", security = @SecurityRequirement(name = "BearerAuth"))
+    public PaginaRespuesta<PedidoResponseDto> listarPedidosPorEstado(
+            @RequestParam EstadoPedido estado,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            HttpServletRequest request
+    ) {
+        String rol = (String) request.getAttribute("rol");
+        Long idEmpleado = (Long) request.getAttribute("idUsuario");
+        return pedidoHandler.listarPedidosPorEstado(estado, page, size, rol, idEmpleado);
     }
 
 }

@@ -16,6 +16,8 @@ import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
+import static com.pragma.powerup.plazoleta.util.Roles.*;
+
 @RequiredArgsConstructor
 public class RestauranteJpaAdapter implements IRestaurantePersistencePort, IRestauranteValidationPort
  {
@@ -32,7 +34,7 @@ public class RestauranteJpaAdapter implements IRestaurantePersistencePort, IRest
     public boolean propietarioExisteYEsValido(Long idPropietario) {
         try{
             var usuario = usuarioRestClient.obtenerUsuarioPorId(idPropietario);
-            return usuario != null && "PROPIETARIO".equalsIgnoreCase(usuario.getRol());
+            return usuario != null && PROPIETARIO.equalsIgnoreCase(usuario.getRol());
         }catch (RuntimeException e) {
             return false;
         }
@@ -42,7 +44,7 @@ public class RestauranteJpaAdapter implements IRestaurantePersistencePort, IRest
      public boolean esPropietarioDelRestaurante(Long idPropietario, Long idRestaurante) {
          try {
              var usuario = usuarioRestClient.obtenerUsuarioPorId(idPropietario);
-             if (usuario == null || !"PROPIETARIO".equalsIgnoreCase(usuario.getRol())) {
+             if (usuario == null || !PROPIETARIO.equalsIgnoreCase(usuario.getRol())) {
                  return false;
              }
 

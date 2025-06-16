@@ -3,7 +3,7 @@ package com.pragma.powerup.plazoleta.infraestructure.input.rest.mapper;
 import com.pragma.powerup.plazoleta.domain.model.Plato;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoRequestDto;
 
-public class PlatoRequestMapper {
+public class  PlatoRequestMapper {
 
     public static Plato toModel(PlatoRequestDto dto) {
         Plato plato = Plato.builder().build();

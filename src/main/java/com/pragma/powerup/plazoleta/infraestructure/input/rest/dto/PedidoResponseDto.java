@@ -1,30 +1,16 @@
-package com.pragma.powerup.plazoleta.infraestructure.output.jpa.entity;
+package com.pragma.powerup.plazoleta.infraestructure.input.rest.dto;
 
-import com.pragma.powerup.plazoleta.domain.model.EstadoPedido;
-import jakarta.persistence.*;
 import java.util.Date;
 import java.util.List;
 
-@Entity
-@Table(name = "pedido")
-public class PedidoEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class PedidoResponseDto {
     private Long id;
-
     private Long idCliente;
     private Long idRestaurante;
-
-    @Enumerated(EnumType.STRING)
-    private com.pragma.powerup.plazoleta.domain.model.EstadoPedido estado;
-
+    private String estado;
     private Date fecha;
-
     private Long idEmpleadoAsignado;
-
-    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<PedidoPlatoEntity> platos;
+    private List<PlatoPedidoDto> platos;
 
     public Long getId() {
         return id;
@@ -50,11 +36,11 @@ public class PedidoEntity {
         this.idRestaurante = idRestaurante;
     }
 
-    public EstadoPedido getEstado() {
+    public String getEstado() {
         return estado;
     }
 
-    public void setEstado(EstadoPedido estado) {
+    public void setEstado(String estado) {
         this.estado = estado;
     }
 
@@ -74,11 +60,11 @@ public class PedidoEntity {
         this.idEmpleadoAsignado = idEmpleadoAsignado;
     }
 
-    public List<PedidoPlatoEntity> getPlatos() {
+    public List<PlatoPedidoDto> getPlatos() {
         return platos;
     }
 
-    public void setPlatos(List<PedidoPlatoEntity> platos) {
+    public void setPlatos(List<PlatoPedidoDto> platos) {
         this.platos = platos;
     }
 }

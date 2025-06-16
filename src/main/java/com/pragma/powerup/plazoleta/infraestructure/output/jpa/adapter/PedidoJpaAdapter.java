@@ -3,6 +3,7 @@ package com.pragma.powerup.plazoleta.infraestructure.output.jpa.adapter;
 import com.pragma.powerup.plazoleta.domain.exception.EstadoPedidoInvalidoException;
 import com.pragma.powerup.plazoleta.domain.exception.PedidoNoExisteException;
 import com.pragma.powerup.plazoleta.domain.model.EstadoPedido;
+import com.pragma.powerup.plazoleta.domain.model.PaginaRespuesta;
 import com.pragma.powerup.plazoleta.domain.model.Pedido;
 import com.pragma.powerup.plazoleta.domain.spi.IPedidoPersistencePort;
 
@@ -10,6 +11,9 @@ import com.pragma.powerup.plazoleta.infraestructure.output.jpa.entity.PedidoEnti
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.mapper.PedidoEntityMapper;
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.repository.IPedidoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -56,6 +60,28 @@ public class PedidoJpaAdapter implements IPedidoPersistencePort {
         PedidoEntity entity = pedidoRepository.findById(idPedido)
                 .orElseThrow(() -> new PedidoNoExisteException(PEDIDO_NO_EXISTE));
         return PedidoEntityMapper.toModel(entity);
+    }
+
+    @Override
+    public PaginaRespuesta<Pedido> listarPedidosPorEstadoYEmpleado(
+            Long idRestaurante, Long idEmpleado, EstadoPedido estado, int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<PedidoEntity> pageResult = pedidoRepository.findByIdEmpleadoAsignadoAndEstado(
+                idEmpleado, estado, pageable
+        );
+
+        List<Pedido> contenido = pageResult.getContent().stream()
+                .map(PedidoEntityMapper::toModel)
+                .toList();
+
+        return new PaginaRespuesta<>(
+                contenido,
+                pageResult.getNumber(),
+                pageResult.getTotalPages(),
+                pageResult.getTotalElements(),
+                pageResult.getSize()
+        );
     }
 
 

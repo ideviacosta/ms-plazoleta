@@ -10,11 +10,10 @@ import com.pragma.powerup.plazoleta.application.usecase.RestauranteUseCase;
 import com.pragma.powerup.plazoleta.domain.api.IPedidoService;
 import com.pragma.powerup.plazoleta.domain.api.IPlatoService;
 import com.pragma.powerup.plazoleta.domain.api.IRestauranteService;
-import com.pragma.powerup.plazoleta.domain.spi.IPedidoPersistencePort;
-import com.pragma.powerup.plazoleta.domain.spi.IPlatoPersistencePort;
-import com.pragma.powerup.plazoleta.domain.spi.IRestaurantePersistencePort;
-import com.pragma.powerup.plazoleta.domain.spi.IRestauranteValidationPort;
+import com.pragma.powerup.plazoleta.domain.spi.*;
+import com.pragma.powerup.plazoleta.infraestructure.output.jpa.adapter.EmpleadoRestauranteJpaAdapter;
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.adapter.PedidoJpaAdapter;
+import com.pragma.powerup.plazoleta.infraestructure.output.jpa.repository.IEmpleadoRestauranteRepository;
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.repository.IPedidoRepository;
 import com.pragma.powerup.plazoleta.util.JwtUtil;
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.adapter.PlatoJpaAdapter;
@@ -42,6 +41,11 @@ public class BeanConfiguration {
     }
 
     @Bean
+    public EmpleadoRestauranteJpaAdapter empleadoRestauranteJpaAdapter(IEmpleadoRestauranteRepository repository) {
+        return new EmpleadoRestauranteJpaAdapter(repository);
+    }
+
+    @Bean
     public PedidoJpaAdapter pedidoJpaAdapter(IPedidoRepository pedidoRepository) {
         return new PedidoJpaAdapter(pedidoRepository);
     }
@@ -59,8 +63,8 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public IPedidoService pedidoService(IPedidoPersistencePort pedidoPersistencePort) {
-        return new PedidoUseCase(pedidoPersistencePort);
+    public IPedidoService pedidoService(IPedidoPersistencePort pedidoPersistencePort, IEmpleadoRestaurantePersistencePort empleadoRestaurantePort) {
+        return new PedidoUseCase(pedidoPersistencePort, empleadoRestaurantePort );
     }
 
     // ---------- Handlers ----------

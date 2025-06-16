@@ -16,4 +16,7 @@ public class MensajesError {
     public static final String SOLO_SE_PUEDE_ASIGNAR_PEDIDOS_EN_PENDIENTE ="Solo se pueden asignar pedidos en estado PENDIENTE";
     public static final String PEDIDO_NO_EXISTE = "Pedido no encontrado";
     public static final String PEDIDO_YA_ASIGNADO = "Pedido ya asignado";
+    public static final String EMPLEADO_NO_ASOCIADO_RESTAURANTE ="Empleado no está asociado a ningún restaurante";
+    public static final String PEDIDO_NO_PERTENECE_A_RESTAURANTE = "El pedido no pertenece al restaurante del empleado";
+
 }
