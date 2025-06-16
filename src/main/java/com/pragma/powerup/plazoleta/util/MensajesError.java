@@ -13,4 +13,7 @@ public class MensajesError {
     public static final String PROPIETARIO_INVALIDO = "Propietario inválido: no existe o no tiene rol PROPIETARIO";
     public static final String PLATO_NO_EXISTE = "Plato no existe";
     public static final String PEDIDO_EN_PROCESO = "Pedido en proceso";
+    public static final String SOLO_SE_PUEDE_ASIGNAR_PEDIDOS_EN_PENDIENTE ="Solo se pueden asignar pedidos en estado PENDIENTE";
+    public static final String PEDIDO_NO_EXISTE = "Pedido no encontrado";
+    public static final String PEDIDO_YA_ASIGNADO = "Pedido ya asignado";
 }

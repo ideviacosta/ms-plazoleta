@@ -20,4 +20,10 @@ public class PedidoHandler implements IPedidoHandler {
         Pedido pedido = PedidoRequestMapper.toModel(pedidoDto, idCliente);
         pedidoService.realizarPedido(pedido, rolCliente, idCliente);
     }
+
+    @Override
+    public void asignarPedido(Long idPedido, Long idEmpleado, String rolEmpleado){
+        pedidoService.asignarPedido(idPedido, idEmpleado, rolEmpleado);
+    }
+
 }

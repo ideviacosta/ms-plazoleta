@@ -4,4 +4,6 @@ import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PedidoRequest
 
 public interface IPedidoHandler {
     void realizarPedido(PedidoRequestDto pedidoDto, Long idCliente, String rolCliente);
+    void asignarPedido(Long idPedido, Long idEmpleado, String rolEmpleado);
+
 }

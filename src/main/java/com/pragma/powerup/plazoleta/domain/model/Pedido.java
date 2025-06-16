@@ -10,6 +10,7 @@ public class Pedido {
     private EstadoPedido estado;
     private Date fecha;
     private List<PedidoPlato> platos;
+    private Long idEmpleadoAsignado;
 
     private Pedido(Builder builder) {
         this.id = builder.id;
@@ -18,6 +19,7 @@ public class Pedido {
         this.estado = builder.estado;
         this.fecha = builder.fecha;
         this.platos = builder.platos;
+        this.idEmpleadoAsignado = builder.idEmpleadoAsignado;
     }
 
     public static Builder builder() {
@@ -31,6 +33,7 @@ public class Pedido {
         private EstadoPedido estado;
         private Date fecha;
         private List<PedidoPlato> platos;
+        private Long idEmpleadoAsignado;
 
         public Builder id(Long id) {
             this.id = id;
@@ -61,6 +64,10 @@ public class Pedido {
             this.platos = platos;
             return this;
         }
+        public Builder idEmpleadoAsignado(Long idEmpleadoAsignado) {
+            this.idEmpleadoAsignado = idEmpleadoAsignado;
+            return this;
+        }
 
         public Pedido build() {
             return new Pedido(this);
@@ -74,4 +81,33 @@ public class Pedido {
     public EstadoPedido getEstado() { return estado; }
     public Date getFecha() { return fecha; }
     public List<PedidoPlato> getPlatos() { return platos; }
+    public Long getIdEmpleadoAsignado() { return idEmpleadoAsignado; }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setIdCliente(Long idCliente) {
+        this.idCliente = idCliente;
+    }
+
+    public void setIdRestaurante(Long idRestaurante) {
+        this.idRestaurante = idRestaurante;
+    }
+
+    public void setEstado(EstadoPedido estado) {
+        this.estado = estado;
+    }
+
+    public void setFecha(Date fecha) {
+        this.fecha = fecha;
+    }
+
+    public void setPlatos(List<PedidoPlato> platos) {
+        this.platos = platos;
+    }
+
+    public void setIdEmpleadoAsignado(Long idEmpleadoAsignado) {
+        this.idEmpleadoAsignado = idEmpleadoAsignado;
+    }
 }

@@ -20,6 +20,9 @@ public class PedidoEntity {
 
     private Date fecha;
 
+    private Long idEmpleadoAsignado;
+
+
     public Long getId() {
         return id;
     }
@@ -58,5 +61,13 @@ public class PedidoEntity {
 
     public void setFecha(Date fecha) {
         this.fecha = fecha;
+    }
+
+    public Long getIdEmpleadoAsignado() {
+        return idEmpleadoAsignado;
+    }
+
+    public void setIdEmpleadoAsignado(Long idEmpleadoAsignado) {
+        this.idEmpleadoAsignado = idEmpleadoAsignado;
     }
 }

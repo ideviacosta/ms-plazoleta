@@ -37,4 +37,19 @@ public class PedidoRestController {
 
         pedidoHandler.realizarPedido(pedidoDto, idCliente, rol);
     }
+
+    @PutMapping("/{idPedido}/asignar")
+    @Operation(summary = "Asignarse a un pedido", security = @SecurityRequirement(name = "BearerAuth"))
+    @ApiResponses(value ={
+            @ApiResponse(responseCode = "200", description = "Pedido asignado"),
+            @ApiResponse(responseCode = "403", description = "Rol no autorizado o estado inválido")
+    })
+    public void asignarPedido(
+            @PathVariable Long idPedido,
+            HttpServletRequest request) {
+        String rol = (String) request.getAttribute("rol");
+        Long idEmpleado = (Long) request.getAttribute("idUsuario");
+        pedidoHandler.asignarPedido(idPedido, idEmpleado, rol);
+    }
+
 }

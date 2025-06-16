@@ -131,4 +131,19 @@ class PedidoUseCaseTest {
         verify(persistencePort, never()).guardarPedido(any());
     }
 
+    @Test
+    void asignarPedido_exitoso() {
+        Pedido pedido = Pedido.builder()
+                .id(1L)
+                .estado(EstadoPedido.PENDIENTE)
+                .build();
+
+        when(persistencePort.obtenerPedidoPorId(1L)).thenReturn(pedido);
+
+        pedidoUseCase.asignarPedido(1L, 5L, "EMPLEADO");
+
+        verify(persistencePort).asignarPedido(1L, 5L);
+    }
+
+
 }
