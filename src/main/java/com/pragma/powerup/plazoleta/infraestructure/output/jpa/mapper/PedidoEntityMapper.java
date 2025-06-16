@@ -24,7 +24,7 @@ public class PedidoEntityMapper {
                 PedidoPlatoEntity pe = new PedidoPlatoEntity();
                 pe.setIdPlato(p.getIdPlato());
                 pe.setCantidad(p.getCantidad());
-                pe.setPedido(entity); // Importante para la relación inversa
+                pe.setPedido(entity);
                 return pe;
             }).toList();
             entity.setPlatos(platos);

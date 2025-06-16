@@ -30,11 +30,9 @@ public class PedidoUseCase implements IPedidoService {
     @Override
     public void realizarPedido(Pedido pedido, String rolCliente, Long idCliente) {
         validarRol(rolCliente, CLIENTE);
-
         if (persistencePort.clienteTienePedidoEnProceso(idCliente)) {
             throw new PedidoEnProcesoException(PEDIDO_EN_PROCESO);
         }
-
         Pedido pedidoAguardar = Pedido.builder()
                 .idCliente(idCliente)
                 .idRestaurante(pedido.getIdRestaurante())
@@ -42,25 +40,20 @@ public class PedidoUseCase implements IPedidoService {
                 .fecha(Date.from(Instant.now()))
                 .platos(pedido.getPlatos())
                 .build();
-
         persistencePort.guardarPedido(pedidoAguardar);
     }
 
     @Override
     public void asignarPedido(Long idPedido, Long idEmpleado, String rolEmpleado) {
         validarRol(rolEmpleado, EMPLEADO);
-
         Pedido pedido = persistencePort.obtenerPedidoPorId(idPedido);
-
         if (!pedido.getEstado().equals(EstadoPedido.PENDIENTE)) {
             throw new EstadoPedidoInvalidoException(SOLO_SE_PUEDE_ASIGNAR_PEDIDOS_EN_PENDIENTE);
         }
-
         Long idRestauranteEmpleado = empleadoRestaurantePort.obtenerIdRestaurantePorEmpleado(idEmpleado);
         if (!pedido.getIdRestaurante().equals(idRestauranteEmpleado)) {
             throw new EstadoPedidoInvalidoException(PEDIDO_NO_PERTENECE_A_RESTAURANTE);
         }
-
         pedido.setIdEmpleadoAsignado(idEmpleado);
         pedido.setEstado(EstadoPedido.EN_PREPARACION);
         persistencePort.asignarPedido(idPedido, idEmpleado);
@@ -70,26 +63,20 @@ public class PedidoUseCase implements IPedidoService {
     @Override
     public Pedido obtenerPedidoPorId(Long idPedido, String rolEmpleado, Long idEmpleado) {
         validarRol(rolEmpleado, EMPLEADO);
-
         Pedido pedido = persistencePort.obtenerPedidoPorId(idPedido);
-
         if (pedido.getIdEmpleadoAsignado() != null) {
             throw new PedidoYaAsignadoException(PEDIDO_YA_ASIGNADO);
         }
-
         return pedido;
     }
 
     @Override
     public PaginaRespuesta<Pedido> listarPedidosPorEstadoYEmpleado(
             Long idEmpleado, EstadoPedido estado, int page, int size, String rol) {
-
         validarRol(rol, EMPLEADO);
-
-        // 🆕 Obtener restaurante al que pertenece el empleado
+        // Obtener restaurante al que pertenece el empleado
         Long idRestaurante = empleadoRestaurantePort.obtenerIdRestaurantePorEmpleado(idEmpleado);
-
-        // 🆕 Filtrar pedidos por restaurante y estado
+        // Filtrar pedidos por restaurante y estado
         return persistencePort.listarPedidosPorEstadoYEmpleado(idRestaurante, idEmpleado, estado, page, size);
     }
 

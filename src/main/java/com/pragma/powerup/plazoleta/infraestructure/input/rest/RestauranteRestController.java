@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/restaurantes")
@@ -24,6 +23,7 @@ import java.util.List;
 public class RestauranteRestController {
 
     private final IRestauranteHandler restauranteHandler;
+    private static final String ATTR_ROL = "rol";
 
     @Operation(summary = "Crear un nuevo restaurante" , security = @SecurityRequirement(name = "BearerAuth"))
     @ApiResponses(value = {
@@ -34,7 +34,7 @@ public class RestauranteRestController {
     @ResponseStatus(HttpStatus.CREATED)
     public void crearRestaurante(@Valid @RequestBody RestauranteRequestDto dto,
                                  HttpServletRequest request) {
-        String rolCreador = (String) request.getAttribute("rol");
+        String rolCreador = (String) request.getAttribute(ATTR_ROL);
 
         restauranteHandler.crearRestaurante(dto, rolCreador);
     }
@@ -49,7 +49,7 @@ public class RestauranteRestController {
             @RequestParam(name = "pagina", defaultValue = "0") int page,
             @RequestParam(name = "tamanio", defaultValue = "10") int size,
             HttpServletRequest request) {
-        String rol = (String) request.getAttribute("rol");
+        String rol = (String) request.getAttribute(ATTR_ROL);
         return restauranteHandler.listarRestaurantes(page, size, rol);
     }
 

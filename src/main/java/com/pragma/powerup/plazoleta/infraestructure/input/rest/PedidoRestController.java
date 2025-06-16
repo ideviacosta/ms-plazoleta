@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.*;
 public class PedidoRestController {
 
     private final IPedidoHandler pedidoHandler;
+    private static final String ATTR_ID_USUARIO = "idUsuario";
+    private static final String ATTR_ROL = "rol";
 
     public PedidoRestController(IPedidoHandler pedidoHandler) {
         this.pedidoHandler = pedidoHandler;
@@ -35,8 +37,8 @@ public class PedidoRestController {
             @ApiResponse(responseCode = "403", description = "Rol no autorizado")
     })
     public void realizarPedido(@Valid @RequestBody PedidoRequestDto pedidoDto, HttpServletRequest request) {
-        String rol = (String) request.getAttribute("rol");
-        Long idCliente = (Long) request.getAttribute("idUsuario");
+        String rol = (String) request.getAttribute(ATTR_ROL);
+        Long idCliente = (Long) request.getAttribute(ATTR_ID_USUARIO);
 
         pedidoHandler.realizarPedido(pedidoDto, idCliente, rol);
     }
@@ -50,8 +52,8 @@ public class PedidoRestController {
     public void asignarPedido(
             @PathVariable Long idPedido,
             HttpServletRequest request) {
-        String rol = (String) request.getAttribute("rol");
-        Long idEmpleado = (Long) request.getAttribute("idUsuario");
+        String rol = (String) request.getAttribute(ATTR_ROL);
+        Long idEmpleado = (Long) request.getAttribute(ATTR_ID_USUARIO);
         pedidoHandler.asignarPedido(idPedido, idEmpleado, rol);
     }
 
@@ -63,8 +65,8 @@ public class PedidoRestController {
             @RequestParam(defaultValue = "10") int size,
             HttpServletRequest request
     ) {
-        String rol = (String) request.getAttribute("rol");
-        Long idEmpleado = (Long) request.getAttribute("idUsuario");
+        String rol = (String) request.getAttribute(ATTR_ROL);
+        Long idEmpleado = (Long) request.getAttribute(ATTR_ID_USUARIO);
         return pedidoHandler.listarPedidosPorEstado(estado, page, size, rol, idEmpleado);
     }
 

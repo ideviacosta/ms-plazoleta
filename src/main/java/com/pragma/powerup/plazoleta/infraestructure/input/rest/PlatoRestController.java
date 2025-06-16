@@ -2,7 +2,6 @@ package com.pragma.powerup.plazoleta.infraestructure.input.rest;
 
 import com.pragma.powerup.plazoleta.application.handler.IPlatoHandler;
 import com.pragma.powerup.plazoleta.domain.model.PaginaRespuesta;
-import com.pragma.powerup.plazoleta.domain.model.Plato;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoEstadoRequestDto;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoListadoResponseDto;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PlatoRequestDto;
@@ -18,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/platos")
@@ -27,6 +25,9 @@ import java.util.List;
 public class PlatoRestController {
 
     private final IPlatoHandler platoHandler;
+    private static final String ATTR_ID_USUARIO = "idUsuario";
+    private static final String ATTR_ROL = "rol";
+
 
     @Operation(summary = "Crear un nuevo plato" , security = @SecurityRequirement(name = "BearerAuth"))
     @ApiResponses(value = {
@@ -37,8 +38,8 @@ public class PlatoRestController {
     @ResponseStatus(HttpStatus.CREATED)
     public void crearPlato(@Valid @RequestBody PlatoRequestDto dto,
                            HttpServletRequest request) {
-        String rol = (String) request.getAttribute("rol");
-        Long idPropietario = (Long) request.getAttribute("idUsuario");
+        String rol = (String) request.getAttribute(ATTR_ROL);
+        Long idPropietario = (Long) request.getAttribute(ATTR_ID_USUARIO);
 
         platoHandler.crearPlato(dto, rol, idPropietario);
     }
@@ -53,8 +54,8 @@ public class PlatoRestController {
     public void modificarPlato(@PathVariable Long idPlato,
                                @RequestBody PlatoUpdateRequestDto dto,
                                HttpServletRequest request) {
-        String rol = (String) request.getAttribute("rol");
-        Long idPropietario = (Long) request.getAttribute("idUsuario");
+        String rol = (String) request.getAttribute(ATTR_ROL);
+        Long idPropietario = (Long) request.getAttribute(ATTR_ID_USUARIO);
 
         platoHandler.modificarPlato(idPlato, dto, rol, idPropietario);
     }
@@ -69,8 +70,8 @@ public class PlatoRestController {
     public void cambiarEstadoPlato(@PathVariable Long idPlato,
                                    @RequestBody PlatoEstadoRequestDto dto,
                                    HttpServletRequest request) {
-        String rol = (String) request.getAttribute("rol");
-        Long idPropietario = (Long) request.getAttribute("idUsuario");
+        String rol = (String) request.getAttribute(ATTR_ROL);
+        Long idPropietario = (Long) request.getAttribute(ATTR_ID_USUARIO);
 
         platoHandler.cambiarEstadoPlato(idPlato, dto.isHabilitar(), rol, idPropietario);
     }
@@ -88,10 +89,8 @@ public class PlatoRestController {
             @RequestParam(defaultValue = "10") int size,
             HttpServletRequest request
     ) {
-        String rol = (String) request.getAttribute("rol");
+        String rol = (String) request.getAttribute(ATTR_ROL);
         return platoHandler.listarPlatosPorRestaurante(idRestaurante, idCategoria, page, size, rol);
     }
-
-
 
 }
