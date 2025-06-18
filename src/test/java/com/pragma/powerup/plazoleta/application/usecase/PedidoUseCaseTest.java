@@ -8,6 +8,7 @@ import com.pragma.powerup.plazoleta.domain.model.Pedido;
 import com.pragma.powerup.plazoleta.domain.model.PedidoPlato;
 import com.pragma.powerup.plazoleta.domain.spi.IEmpleadoRestaurantePersistencePort;
 import com.pragma.powerup.plazoleta.domain.spi.IPedidoPersistencePort;
+import com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente.NotificacionSmsClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,13 +24,15 @@ class PedidoUseCaseTest {
 
     private IPedidoPersistencePort persistencePort;
     private IEmpleadoRestaurantePersistencePort empleadoRestaurantePort;
+    private NotificacionSmsClient notificacionSmsClient;
     private PedidoUseCase pedidoUseCase;
 
     @BeforeEach
     void setUp() {
         persistencePort = mock(IPedidoPersistencePort.class);
         empleadoRestaurantePort=mock(IEmpleadoRestaurantePersistencePort.class);
-        pedidoUseCase = new PedidoUseCase(persistencePort, empleadoRestaurantePort);
+        notificacionSmsClient = mock(NotificacionSmsClient.class);
+        pedidoUseCase = new PedidoUseCase(persistencePort, empleadoRestaurantePort, notificacionSmsClient);
     }
 
     @Test
@@ -297,6 +300,61 @@ class PedidoUseCaseTest {
 
         assertTrue(exception.getMessage().contains("Se requiere rol: EMPLEADO"));
         verifyNoInteractions(persistencePort);
+    }
+
+    @Test
+    void notificarPedidoListo_deberiaActualizarEstadoYEnviarNotificacion_siTodoEsValido() {
+        // Arrange
+        Long idPedido = 100L;
+        Long idEmpleado = 200L;
+        String telefonoDestino = "+1234567890";
+        String rol = "EMPLEADO";
+
+        Pedido pedido = Pedido.builder()
+                .id(idPedido)
+                .idRestaurante(300L)
+                .estado(EstadoPedido.EN_PREPARACION)
+                .build();
+
+        when(persistencePort.obtenerPedidoPorId(idPedido)).thenReturn(pedido);
+        when(empleadoRestaurantePort.obtenerIdRestaurantePorEmpleado(idEmpleado)).thenReturn(300L);
+
+        // Act
+        assertDoesNotThrow(() -> pedidoUseCase.notificarPedidoListo(idPedido, idEmpleado, telefonoDestino, rol));
+
+        // Assert
+        verify(persistencePort).guardarPedido(argThat(p ->
+                p.getEstado() == EstadoPedido.LISTO
+        ));
+        verify(notificacionSmsClient).enviarSms(eq(telefonoDestino), startsWith("Tu pedido está listo. PIN: "));
+    }
+
+    @Test
+    void notificarPedidoListo_deberiaLanzarExcepcion_siPedidoNoPerteneceARestauranteDelEmpleado() {
+        // Arrange
+        Long idPedido = 1L;
+        Long idEmpleado = 2L;
+        String telefonoDestino = "+1234567890";
+        String rol = "EMPLEADO";
+
+        Pedido pedido = Pedido.builder()
+                .id(idPedido)
+                .idRestaurante(100L)
+                .estado(EstadoPedido.EN_PREPARACION)
+                .build();
+
+        when(persistencePort.obtenerPedidoPorId(idPedido)).thenReturn(pedido);
+        when(empleadoRestaurantePort.obtenerIdRestaurantePorEmpleado(idEmpleado)).thenReturn(200L); // restaurante diferente
+
+        // Act & Assert
+        EstadoPedidoInvalidoException exception = assertThrows(
+                EstadoPedidoInvalidoException.class,
+                () -> pedidoUseCase.notificarPedidoListo(idPedido, idEmpleado, telefonoDestino, rol)
+        );
+
+        assertEquals(PEDIDO_NO_PERTENECE_A_RESTAURANTE, exception.getMessage());
+        verify(persistencePort, never()).guardarPedido(any());
+        verify(notificacionSmsClient, never()).enviarSms(any(), any());
     }
 
 

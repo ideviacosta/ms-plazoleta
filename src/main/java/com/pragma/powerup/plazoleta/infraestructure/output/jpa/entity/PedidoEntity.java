@@ -26,6 +26,7 @@ public class PedidoEntity {
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<PedidoPlatoEntity> platos;
 
+
     public Long getId() {
         return id;
     }
@@ -81,4 +82,5 @@ public class PedidoEntity {
     public void setPlatos(List<PedidoPlatoEntity> platos) {
         this.platos = platos;
     }
+
 }

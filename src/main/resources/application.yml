@@ -22,6 +22,10 @@ spring:
 usuarios:
   url: ${USUARIOS_SERVICE_URL:http://localhost:8081}
 
+notificaciones:
+  url: http://localhost:8080
+
+
 jwt:
   secret: clave-super-secreta-de-al-menos-32-caracteres
   filter:

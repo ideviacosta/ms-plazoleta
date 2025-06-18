@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -68,6 +69,19 @@ public class PedidoRestController {
         String rol = (String) request.getAttribute(ATTR_ROL);
         Long idEmpleado = (Long) request.getAttribute(ATTR_ID_USUARIO);
         return pedidoHandler.listarPedidosPorEstado(estado, page, size, rol, idEmpleado);
+    }
+
+    @PostMapping("/pedidos/{idPedido}/notificar-listo")
+    @Operation(summary = "Notificar que el pedido está listo", security = @SecurityRequirement(name = "BearerAuth"))
+    @ApiResponses(value ={
+            @ApiResponse(responseCode = "200", description = "Notificación enviada"),
+            @ApiResponse(responseCode = "403", description = "Rol no autorizado o estado inválido")
+    })
+    public ResponseEntity<Void> notificarPedidoListo(@PathVariable Long idPedido, @RequestParam String telefonoDestino, HttpServletRequest request) {
+        Long idEmpleado = (Long) request.getAttribute(ATTR_ID_USUARIO);
+        String rol = (String) request.getAttribute(ATTR_ROL);
+        pedidoHandler.notificarPedidoListo(idPedido, idEmpleado, telefonoDestino, rol);
+        return ResponseEntity.ok().build();
     }
 
 }

@@ -18,5 +18,6 @@ public class MensajesError {
     public static final String PEDIDO_YA_ASIGNADO = "Pedido ya asignado";
     public static final String EMPLEADO_NO_ASOCIADO_RESTAURANTE ="Empleado no está asociado a ningún restaurante";
     public static final String PEDIDO_NO_PERTENECE_A_RESTAURANTE = "El pedido no pertenece al restaurante del empleado";
+    public static final String PEDIDO_LISTO_CODIGO_DE_ENTREGA ="Tu pedido está listo. PIN: ";
 
 }

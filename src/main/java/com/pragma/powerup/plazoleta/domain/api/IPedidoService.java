@@ -9,4 +9,5 @@ public interface IPedidoService {
     void asignarPedido(Long idPedido, Long idEmpleado, String rolEmpleado);
     Pedido obtenerPedidoPorId(Long idPedido, String rolEmpleado, Long idEmpleado);
     PaginaRespuesta<Pedido> listarPedidosPorEstadoYEmpleado(Long idEmpleado, EstadoPedido estado, int page, int size, String rol);
+    void notificarPedidoListo(Long idPedido, Long idEmpleado, String telefonoDestino, String rolCliente);
 }

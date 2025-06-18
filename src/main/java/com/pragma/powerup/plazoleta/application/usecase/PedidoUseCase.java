@@ -9,9 +9,11 @@ import com.pragma.powerup.plazoleta.domain.model.PaginaRespuesta;
 import com.pragma.powerup.plazoleta.domain.model.Pedido;
 import com.pragma.powerup.plazoleta.domain.spi.IEmpleadoRestaurantePersistencePort;
 import com.pragma.powerup.plazoleta.domain.spi.IPedidoPersistencePort;
+import com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente.NotificacionSmsClient;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.Random;
 
 import static com.pragma.powerup.plazoleta.util.MensajesError.*;
 import static com.pragma.powerup.plazoleta.util.RolValidator.validarRol;
@@ -21,10 +23,16 @@ public class PedidoUseCase implements IPedidoService {
 
     private final IPedidoPersistencePort persistencePort;
     private final IEmpleadoRestaurantePersistencePort empleadoRestaurantePort;
+    private final NotificacionSmsClient notificacionSmsClient;
 
-    public PedidoUseCase(IPedidoPersistencePort persistencePort, IEmpleadoRestaurantePersistencePort empleadoRestaurantePort) {
+    public PedidoUseCase(
+            IPedidoPersistencePort persistencePort,
+            IEmpleadoRestaurantePersistencePort empleadoRestaurantePort,
+            NotificacionSmsClient notificacionSmsClient
+    ) {
         this.persistencePort = persistencePort;
         this.empleadoRestaurantePort = empleadoRestaurantePort;
+        this.notificacionSmsClient = notificacionSmsClient;
     }
 
     @Override
@@ -80,6 +88,24 @@ public class PedidoUseCase implements IPedidoService {
         return persistencePort.listarPedidosPorEstadoYEmpleado(idRestaurante, idEmpleado, estado, page, size);
     }
 
+    @Override
+    public void notificarPedidoListo(Long idPedido, Long idEmpleado, String telefonoDestino, String rolCliente) {
+        validarRol(rolCliente, EMPLEADO);
+        Pedido pedido = persistencePort.obtenerPedidoPorId(idPedido);
+        Long restauranteEmpleado = empleadoRestaurantePort.obtenerIdRestaurantePorEmpleado(idEmpleado);
+        if (!pedido.getIdRestaurante().equals(restauranteEmpleado)) {
+            throw new EstadoPedidoInvalidoException(PEDIDO_NO_PERTENECE_A_RESTAURANTE);
+        }
 
+        pedido.setEstado(EstadoPedido.LISTO);
+        persistencePort.guardarPedido(pedido);
+        notificacionSmsClient.enviarSms(telefonoDestino,
+                                PEDIDO_LISTO_CODIGO_DE_ENTREGA + generarPinAleatorio());
+    }
+
+    private String generarPinAleatorio() {
+        int pin = new Random().nextInt(9000) + 1000; // Genera número entre 1000 y 9999
+        return String.valueOf(pin);
+    }
 
 }

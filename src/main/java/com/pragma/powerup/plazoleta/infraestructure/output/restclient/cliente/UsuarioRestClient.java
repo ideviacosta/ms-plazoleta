@@ -21,4 +21,6 @@ public class UsuarioRestClient {
             throw new RuntimeException("El usuario con id " + idUsuario + " no existe.");
         }
     }
+
+
 }

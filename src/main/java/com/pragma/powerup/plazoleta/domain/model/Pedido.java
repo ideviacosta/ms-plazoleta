@@ -12,6 +12,8 @@ public class Pedido {
     private List<PedidoPlato> platos;
     private Long idEmpleadoAsignado;
 
+
+
     private Pedido(Builder builder) {
         this.id = builder.id;
         this.idCliente = builder.idCliente;
@@ -34,6 +36,7 @@ public class Pedido {
         private Date fecha;
         private List<PedidoPlato> platos;
         private Long idEmpleadoAsignado;
+
 
         public Builder id(Long id) {
             this.id = id;
@@ -68,6 +71,7 @@ public class Pedido {
             this.idEmpleadoAsignado = idEmpleadoAsignado;
             return this;
         }
+
 
         public Pedido build() {
             return new Pedido(this);

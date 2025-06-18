@@ -15,6 +15,7 @@ import com.pragma.powerup.plazoleta.infraestructure.output.jpa.adapter.EmpleadoR
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.adapter.PedidoJpaAdapter;
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.repository.IEmpleadoRestauranteRepository;
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.repository.IPedidoRepository;
+import com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente.NotificacionSmsClient;
 import com.pragma.powerup.plazoleta.util.JwtUtil;
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.adapter.PlatoJpaAdapter;
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.adapter.RestauranteJpaAdapter;
@@ -63,8 +64,8 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public IPedidoService pedidoService(IPedidoPersistencePort pedidoPersistencePort, IEmpleadoRestaurantePersistencePort empleadoRestaurantePort) {
-        return new PedidoUseCase(pedidoPersistencePort, empleadoRestaurantePort );
+    public IPedidoService pedidoService(IPedidoPersistencePort pedidoPersistencePort, IEmpleadoRestaurantePersistencePort empleadoRestaurantePort, NotificacionSmsClient notificacionSmsClient) {
+        return new PedidoUseCase(pedidoPersistencePort, empleadoRestaurantePort , notificacionSmsClient);
     }
 
     // ---------- Handlers ----------

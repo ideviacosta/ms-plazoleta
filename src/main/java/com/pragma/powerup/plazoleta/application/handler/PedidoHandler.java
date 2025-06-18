@@ -51,4 +51,9 @@ public class PedidoHandler implements IPedidoHandler {
         );
     }
 
+    @Override
+    public void notificarPedidoListo(Long idPedido, Long idEmpleado, String telefonoDestino,String rol) {
+        pedidoService.notificarPedidoListo(idPedido, idEmpleado, telefonoDestino,rol);
+    }
+
 }
