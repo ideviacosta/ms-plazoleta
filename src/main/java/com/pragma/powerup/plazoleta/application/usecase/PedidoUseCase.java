@@ -4,6 +4,7 @@ import com.pragma.powerup.plazoleta.domain.api.IPedidoService;
 import com.pragma.powerup.plazoleta.domain.exception.EstadoPedidoInvalidoException;
 import com.pragma.powerup.plazoleta.domain.exception.PedidoEnProcesoException;
 import com.pragma.powerup.plazoleta.domain.exception.PedidoYaAsignadoException;
+import com.pragma.powerup.plazoleta.domain.exception.PinInvalidoException;
 import com.pragma.powerup.plazoleta.domain.model.EstadoPedido;
 import com.pragma.powerup.plazoleta.domain.model.PaginaRespuesta;
 import com.pragma.powerup.plazoleta.domain.model.Pedido;
@@ -36,8 +37,9 @@ public class PedidoUseCase implements IPedidoService {
     }
 
     @Override
-    public void realizarPedido(Pedido pedido, String rolCliente, Long idCliente) {
-        validarRol(rolCliente, CLIENTE);
+    public void realizarPedido(Pedido pedido, String rol, Long idCliente) {
+        validarRol(rol
+                , CLIENTE);
         if (persistencePort.clienteTienePedidoEnProceso(idCliente)) {
             throw new PedidoEnProcesoException(PEDIDO_EN_PROCESO);
         }
@@ -53,8 +55,8 @@ public class PedidoUseCase implements IPedidoService {
     }
 
     @Override
-    public void asignarPedido(Long idPedido, Long idEmpleado, String rolEmpleado) {
-        validarRol(rolEmpleado, EMPLEADO);
+    public void asignarPedido(Long idPedido, Long idEmpleado, String rol) {
+        validarRol(rol, EMPLEADO);
         Pedido pedido = persistencePort.obtenerPedidoPorId(idPedido);
         if (!pedido.getEstado().equals(EstadoPedido.PENDIENTE)) {
             throw new EstadoPedidoInvalidoException(SOLO_SE_PUEDE_ASIGNAR_PEDIDOS_EN_PENDIENTE);
@@ -70,8 +72,8 @@ public class PedidoUseCase implements IPedidoService {
 
 
     @Override
-    public Pedido obtenerPedidoPorId(Long idPedido, String rolEmpleado, Long idEmpleado) {
-        validarRol(rolEmpleado, EMPLEADO);
+    public Pedido obtenerPedidoPorId(Long idPedido, String rol, Long idEmpleado) {
+        validarRol(rol, EMPLEADO);
         Pedido pedido = persistencePort.obtenerPedidoPorId(idPedido);
         if (pedido.getIdEmpleadoAsignado() != null) {
             throw new PedidoYaAsignadoException(PEDIDO_YA_ASIGNADO);
@@ -90,8 +92,8 @@ public class PedidoUseCase implements IPedidoService {
     }
 
     @Override
-    public void notificarPedidoListo(Long idPedido, Long idEmpleado, String telefonoDestino, String rolCliente) {
-        validarRol(rolCliente, EMPLEADO);
+    public void notificarPedidoListo(Long idPedido, Long idEmpleado, String telefonoDestino, String rol) {
+        validarRol(rol, EMPLEADO);
         Pedido pedido = persistencePort.obtenerPedidoPorId(idPedido);
         Long restauranteEmpleado = empleadoRestaurantePort.obtenerIdRestaurantePorEmpleado(idEmpleado);
         if (!pedido.getIdRestaurante().equals(restauranteEmpleado)) {
@@ -108,5 +110,28 @@ public class PedidoUseCase implements IPedidoService {
         int pin = new Random().nextInt(9000) + 1000;
         return String.valueOf(pin);
     }
+
+    @Override
+    public void marcarPedidoComoEntregado(Long idPedido, Long idEmpleado, int pinIngresado, String rol) {
+        validarRol(rol, EMPLEADO);
+        Pedido pedido = persistencePort.obtenerPedidoPorId(idPedido);
+        Long restauranteEmpleado = empleadoRestaurantePort.obtenerIdRestaurantePorEmpleado(idEmpleado);
+
+        if (!pedido.getIdRestaurante().equals(restauranteEmpleado)) {
+            throw new EstadoPedidoInvalidoException(PEDIDO_NO_PERTENECE_A_RESTAURANTE);
+        }
+
+        if (!pedido.getEstado().equals(EstadoPedido.LISTO)) {
+            throw new EstadoPedidoInvalidoException(SOLO_SE_PUEDE_MARCAR_ENTREGADO_SI_LISTO);
+        }
+
+        if (!pedido.getPinSeguridad().equals(pinIngresado)) {
+            throw new PinInvalidoException(PIN_INCORRECTO);
+        }
+
+        pedido.setEstado(EstadoPedido.ENTREGADO);
+        persistencePort.guardarPedido(pedido);
+    }
+
 
 }

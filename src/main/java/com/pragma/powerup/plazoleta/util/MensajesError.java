@@ -19,5 +19,8 @@ public class MensajesError {
     public static final String EMPLEADO_NO_ASOCIADO_RESTAURANTE ="Empleado no está asociado a ningún restaurante";
     public static final String PEDIDO_NO_PERTENECE_A_RESTAURANTE = "El pedido no pertenece al restaurante del empleado";
     public static final String PEDIDO_LISTO_CODIGO_DE_ENTREGA ="Tu pedido está listo. PIN: ";
+    public static final String PIN_INCORRECTO = "El PIN ingresado es incorrecto";
+    public static final String SOLO_SE_PUEDE_MARCAR_ENTREGADO_SI_LISTO = "Solo se puede marcar como entregado un pedido en estado LISTO";
+
 
 }
