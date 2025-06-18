@@ -84,4 +84,22 @@ public class PedidoRestController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/pedidos/{idPedido}/entregar")
+    @Operation(summary = "Marcar pedido como entregado", security = @SecurityRequirement(name = "BearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Pedido marcado como entregado"),
+            @ApiResponse(responseCode = "403", description = "PIN incorrecto o estado no válido")
+    })
+    public ResponseEntity<Void> entregarPedido(
+            @PathVariable Long idPedido,
+            @RequestParam int pin,
+            HttpServletRequest request
+    ) {
+        Long idEmpleado = (Long) request.getAttribute(ATTR_ID_USUARIO);
+        String rol = (String) request.getAttribute(ATTR_ROL);
+        pedidoHandler.marcarPedidoComoEntregado(idPedido, idEmpleado, pin, rol);
+        return ResponseEntity.ok().build();
+    }
+
+
 }

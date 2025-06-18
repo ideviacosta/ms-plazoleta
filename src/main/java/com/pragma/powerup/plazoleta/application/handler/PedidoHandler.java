@@ -56,4 +56,10 @@ public class PedidoHandler implements IPedidoHandler {
         pedidoService.notificarPedidoListo(idPedido, idEmpleado, telefonoDestino,rol);
     }
 
+    @Override
+    public void marcarPedidoComoEntregado(Long idPedido, Long idEmpleado, int pin, String rol) {
+        pedidoService.marcarPedidoComoEntregado(idPedido, idEmpleado, pin, rol);
+    }
+
+
 }

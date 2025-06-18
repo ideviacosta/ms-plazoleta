@@ -357,5 +357,116 @@ class PedidoUseCaseTest {
         verify(notificacionSmsClient, never()).enviarSms(any(), any());
     }
 
+    @Test
+    void marcarPedidoComoEntregado_deberiaActualizarEstado_siPinEsCorrectoYEstadoListo() {
+        // Arrange
+        Long idPedido = 1L;
+        Long idEmpleado = 10L;
+        int pinIngresado = 1234;
+        String rol = "EMPLEADO";
+
+        Pedido pedido = Pedido.builder()
+                .id(idPedido)
+                .idRestaurante(100L)
+                .estado(EstadoPedido.LISTO)
+                .pinSeguridad(pinIngresado)
+                .build();
+
+        when(persistencePort.obtenerPedidoPorId(idPedido)).thenReturn(pedido);
+        when(empleadoRestaurantePort.obtenerIdRestaurantePorEmpleado(idEmpleado)).thenReturn(100L);
+
+        // Act
+        pedidoUseCase.marcarPedidoComoEntregado(idPedido, idEmpleado, pinIngresado, rol);
+
+        // Assert
+        assertEquals(EstadoPedido.ENTREGADO, pedido.getEstado());
+        verify(persistencePort).guardarPedido(pedido);
+    }
+
+    @Test
+    void marcarPedidoComoEntregado_deberiaLanzarExcepcion_siPinEsIncorrecto() {
+        // Arrange
+        Long idPedido = 1L;
+        Long idEmpleado = 10L;
+        int pinCorrecto = 1234;
+        int pinIngresado = 9999; // incorrecto
+        String rol = "EMPLEADO";
+
+        Pedido pedido = Pedido.builder()
+                .id(idPedido)
+                .idRestaurante(100L)
+                .estado(EstadoPedido.LISTO)
+                .pinSeguridad(pinCorrecto)
+                .build();
+
+        when(persistencePort.obtenerPedidoPorId(idPedido)).thenReturn(pedido);
+        when(empleadoRestaurantePort.obtenerIdRestaurantePorEmpleado(idEmpleado)).thenReturn(100L);
+
+        // Act & Assert
+        com.pragma.powerup.plazoleta.domain.exception.PinInvalidoException exception = assertThrows(
+                com.pragma.powerup.plazoleta.domain.exception.PinInvalidoException.class,
+                () -> pedidoUseCase.marcarPedidoComoEntregado(idPedido, idEmpleado, pinIngresado, rol)
+        );
+
+        assertEquals("El PIN ingresado es incorrecto", exception.getMessage());
+        verify(persistencePort, never()).guardarPedido(any());
+    }
+
+    @Test
+    void marcarPedidoComoEntregado_deberiaLanzarExcepcion_siEstadoNoEsListo() {
+        // Arrange
+        Long idPedido = 2L;
+        Long idEmpleado = 20L;
+        int pin = 1234;
+        String rol = "EMPLEADO";
+
+        Pedido pedido = Pedido.builder()
+                .id(idPedido)
+                .idRestaurante(200L)
+                .estado(EstadoPedido.EN_PREPARACION) // no es LISTO
+                .pinSeguridad(pin)
+                .build();
+
+        when(persistencePort.obtenerPedidoPorId(idPedido)).thenReturn(pedido);
+        when(empleadoRestaurantePort.obtenerIdRestaurantePorEmpleado(idEmpleado)).thenReturn(200L);
+
+        // Act & Assert
+        EstadoPedidoInvalidoException exception = assertThrows(
+                EstadoPedidoInvalidoException.class,
+                () -> pedidoUseCase.marcarPedidoComoEntregado(idPedido, idEmpleado, pin, rol)
+        );
+
+        assertEquals("Solo se puede marcar como entregado un pedido en estado LISTO", exception.getMessage());
+        verify(persistencePort, never()).guardarPedido(any());
+    }
+
+    @Test
+    void marcarPedidoComoEntregado_deberiaLanzarExcepcion_siPedidoNoPerteneceARestauranteDelEmpleado() {
+        // Arrange
+        Long idPedido = 3L;
+        Long idEmpleado = 30L;
+        int pin = 1234;
+        String rol = "EMPLEADO";
+
+        Pedido pedido = Pedido.builder()
+                .id(idPedido)
+                .idRestaurante(300L)
+                .estado(EstadoPedido.LISTO)
+                .pinSeguridad(pin)
+                .build();
+
+        when(persistencePort.obtenerPedidoPorId(idPedido)).thenReturn(pedido);
+        when(empleadoRestaurantePort.obtenerIdRestaurantePorEmpleado(idEmpleado)).thenReturn(999L); // distinto
+
+        // Act & Assert
+        EstadoPedidoInvalidoException exception = assertThrows(
+                EstadoPedidoInvalidoException.class,
+                () -> pedidoUseCase.marcarPedidoComoEntregado(idPedido, idEmpleado, pin, rol)
+        );
+
+        assertEquals("El pedido no pertenece al restaurante del empleado", exception.getMessage());
+        verify(persistencePort, never()).guardarPedido(any());
+    }
+
 
 }
