@@ -11,6 +11,7 @@ public class Pedido {
     private Date fecha;
     private List<PedidoPlato> platos;
     private Long idEmpleadoAsignado;
+    private Integer pinSeguridad;
 
 
 
@@ -22,6 +23,7 @@ public class Pedido {
         this.fecha = builder.fecha;
         this.platos = builder.platos;
         this.idEmpleadoAsignado = builder.idEmpleadoAsignado;
+        this.pinSeguridad = builder.pinSeguridad;
     }
 
     public static Builder builder() {
@@ -36,6 +38,7 @@ public class Pedido {
         private Date fecha;
         private List<PedidoPlato> platos;
         private Long idEmpleadoAsignado;
+        private Integer pinSeguridad;
 
 
         public Builder id(Long id) {
@@ -71,7 +74,10 @@ public class Pedido {
             this.idEmpleadoAsignado = idEmpleadoAsignado;
             return this;
         }
-
+        public Builder pinSeguridad(Integer pinSeguridad) {
+            this.pinSeguridad = pinSeguridad;
+            return this;
+        }
 
         public Pedido build() {
             return new Pedido(this);
@@ -86,6 +92,7 @@ public class Pedido {
     public Date getFecha() { return fecha; }
     public List<PedidoPlato> getPlatos() { return platos; }
     public Long getIdEmpleadoAsignado() { return idEmpleadoAsignado; }
+    public Integer getPinSeguridad() { return pinSeguridad; }
 
     public void setId(Long id) {
         this.id = id;
@@ -114,4 +121,6 @@ public class Pedido {
     public void setIdEmpleadoAsignado(Long idEmpleadoAsignado) {
         this.idEmpleadoAsignado = idEmpleadoAsignado;
     }
+
+    public void setPinSeguridad(Integer pinSeguridad) {this.pinSeguridad = pinSeguridad;}
 }

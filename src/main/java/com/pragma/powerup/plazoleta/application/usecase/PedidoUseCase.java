@@ -47,6 +47,7 @@ public class PedidoUseCase implements IPedidoService {
                 .estado(EstadoPedido.PENDIENTE)
                 .fecha(Date.from(Instant.now()))
                 .platos(pedido.getPlatos())
+                .pinSeguridad(Integer.parseInt(generarPinAleatorio()))
                 .build();
         persistencePort.guardarPedido(pedidoAguardar);
     }
@@ -100,11 +101,11 @@ public class PedidoUseCase implements IPedidoService {
         pedido.setEstado(EstadoPedido.LISTO);
         persistencePort.guardarPedido(pedido);
         notificacionSmsClient.enviarSms(telefonoDestino,
-                                PEDIDO_LISTO_CODIGO_DE_ENTREGA + generarPinAleatorio());
+                                PEDIDO_LISTO_CODIGO_DE_ENTREGA + pedido.getPinSeguridad());
     }
 
     private String generarPinAleatorio() {
-        int pin = new Random().nextInt(9000) + 1000; // Genera número entre 1000 y 9999
+        int pin = new Random().nextInt(9000) + 1000;
         return String.valueOf(pin);
     }
 

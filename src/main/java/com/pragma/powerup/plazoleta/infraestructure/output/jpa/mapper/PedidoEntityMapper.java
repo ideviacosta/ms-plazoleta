@@ -17,6 +17,7 @@ public class PedidoEntityMapper {
         entity.setEstado(model.getEstado());
         entity.setFecha(model.getFecha());
         entity.setIdEmpleadoAsignado(model.getIdEmpleadoAsignado());
+        entity.setPinSeguridad(model.getPinSeguridad().toString());
 
         // Mapear platos si vienen presentes
         if (model.getPlatos() != null) {
@@ -48,6 +49,7 @@ public class PedidoEntityMapper {
                 .fecha(entity.getFecha())
                 .idEmpleadoAsignado(entity.getIdEmpleadoAsignado())
                 .platos(platos)
+                .pinSeguridad(Integer.parseInt(entity.getPinSeguridad()))
                 .build();
     }
 

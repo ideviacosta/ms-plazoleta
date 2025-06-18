@@ -26,6 +26,10 @@ public class PedidoEntity {
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<PedidoPlatoEntity> platos;
 
+    @Column(name = "pin_seguridad", nullable = false)
+    private String pinSeguridad;
+
+
 
     public Long getId() {
         return id;
@@ -83,4 +87,7 @@ public class PedidoEntity {
         this.platos = platos;
     }
 
+    public String getPinSeguridad() {return pinSeguridad; }
+
+    public void setPinSeguridad(String pinSeguridad) {this.pinSeguridad = pinSeguridad; }
 }
