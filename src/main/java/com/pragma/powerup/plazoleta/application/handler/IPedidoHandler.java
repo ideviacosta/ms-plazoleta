@@ -11,5 +11,6 @@ public interface IPedidoHandler {
     PaginaRespuesta<PedidoResponseDto> listarPedidosPorEstado(EstadoPedido estado, int page, int size, String rol, Long idEmpleado);
     void notificarPedidoListo(Long idPedido, Long idEmpleado, String telefonoDestino, String rolCliente);
     void marcarPedidoComoEntregado(Long idPedido, Long idEmpleado, int pin, String rol);
+    void cancelarPedido(Long idPedido, Long idCliente, String rol);
 
 }

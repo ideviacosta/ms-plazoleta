@@ -61,5 +61,9 @@ public class PedidoHandler implements IPedidoHandler {
         pedidoService.marcarPedidoComoEntregado(idPedido, idEmpleado, pin, rol);
     }
 
+    @Override
+    public void cancelarPedido(Long idPedido, Long idCliente, String rol) {
+        pedidoService.cancelarPedido(idPedido, idCliente, rol);
+    }
 
 }

@@ -133,5 +133,22 @@ public class PedidoUseCase implements IPedidoService {
         persistencePort.guardarPedido(pedido);
     }
 
+    @Override
+    public void cancelarPedido(Long idPedido, Long idCliente, String rol) {
+        validarRol(rol, CLIENTE);
+
+        Pedido pedido = persistencePort.obtenerPedidoPorId(idPedido);
+
+        if (!pedido.getIdCliente().equals(idCliente)) {
+            throw new EstadoPedidoInvalidoException(PEDIDO_NO_PERTENECE_A_CLIENTE);
+        }
+
+        if (pedido.getEstado() != EstadoPedido.PENDIENTE) {
+            throw new EstadoPedidoInvalidoException(PEDIDO_EN_PREPARACION_NO_CANCELABLE);
+        }
+
+        pedido.setEstado(EstadoPedido.CANCELADO);
+        persistencePort.guardarPedido(pedido);
+    }
 
 }

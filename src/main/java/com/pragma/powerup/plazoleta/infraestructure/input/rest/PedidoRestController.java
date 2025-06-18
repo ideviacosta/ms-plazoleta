@@ -101,5 +101,22 @@ public class PedidoRestController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/pedidos/{idPedido}/cancelar")
+    @Operation(summary = "Cancelar pedido", security = @SecurityRequirement(name = "BearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Pedido cancelado exitosamente"),
+            @ApiResponse(responseCode = "403", description = "No autorizado"),
+            @ApiResponse(responseCode = "409", description = "Estado del pedido no permite cancelación")
+    })
+    public ResponseEntity<Void> cancelarPedido(
+            @PathVariable Long idPedido,
+            HttpServletRequest request
+    ) {
+        Long idCliente = (Long) request.getAttribute(ATTR_ID_USUARIO);
+        String rol = (String) request.getAttribute(ATTR_ROL);
+        pedidoHandler.cancelarPedido(idPedido, idCliente, rol);
+        return ResponseEntity.ok().build();
+    }
+
 
 }

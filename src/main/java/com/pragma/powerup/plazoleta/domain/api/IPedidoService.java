@@ -11,5 +11,5 @@ public interface IPedidoService {
     PaginaRespuesta<Pedido> listarPedidosPorEstadoYEmpleado(Long idEmpleado, EstadoPedido estado, int page, int size, String rol);
     void notificarPedidoListo(Long idPedido, Long idEmpleado, String telefonoDestino, String rolCliente);
     void marcarPedidoComoEntregado(Long idPedido, Long idEmpleado, int pinIngresado, String rolEmpleado);
-
+    void cancelarPedido(Long idPedido, Long idCliente, String rol);
 }

@@ -468,5 +468,86 @@ class PedidoUseCaseTest {
         verify(persistencePort, never()).guardarPedido(any());
     }
 
+    @Test
+    void cancelarPedido_deberiaCancelarPedido_siEstadoEsPendienteYClienteEsElDueño() {
+        Long idPedido = 1L;
+        Long idCliente = 100L;
+        String rol = "CLIENTE";
+
+        Pedido pedido = Pedido.builder()
+                .id(idPedido)
+                .estado(EstadoPedido.PENDIENTE)
+                .idCliente(idCliente)
+                .build();
+
+        when(persistencePort.obtenerPedidoPorId(idPedido)).thenReturn(pedido);
+
+        assertDoesNotThrow(() -> pedidoUseCase.cancelarPedido(idPedido, idCliente, rol));
+
+        assertEquals(EstadoPedido.CANCELADO, pedido.getEstado());
+        verify(persistencePort).guardarPedido(pedido);
+    }
+
+    @Test
+    void cancelarPedido_deberiaLanzarExcepcion_siEstadoNoEsPendiente() {
+        Long idPedido = 2L;
+        Long idCliente = 101L;
+        String rol = "CLIENTE";
+
+        Pedido pedido = Pedido.builder()
+                .id(idPedido)
+                .estado(EstadoPedido.EN_PREPARACION)
+                .idCliente(idCliente)
+                .build();
+
+        when(persistencePort.obtenerPedidoPorId(idPedido)).thenReturn(pedido);
+
+        EstadoPedidoInvalidoException exception = assertThrows(
+                EstadoPedidoInvalidoException.class,
+                () -> pedidoUseCase.cancelarPedido(idPedido, idCliente, rol)
+        );
+
+        assertEquals(PEDIDO_EN_PREPARACION_NO_CANCELABLE, exception.getMessage());
+        verify(persistencePort, never()).guardarPedido(any());
+    }
+
+    @Test
+    void cancelarPedido_deberiaLanzarExcepcion_siPedidoNoPerteneceAlCliente() {
+        Long idPedido = 3L;
+        Long idCliente = 102L;
+        String rol = "CLIENTE";
+
+        Pedido pedido = Pedido.builder()
+                .id(idPedido)
+                .estado(EstadoPedido.PENDIENTE)
+                .idCliente(999L) // otro cliente
+                .build();
+
+        when(persistencePort.obtenerPedidoPorId(idPedido)).thenReturn(pedido);
+
+        EstadoPedidoInvalidoException exception = assertThrows(
+                EstadoPedidoInvalidoException.class,
+                () -> pedidoUseCase.cancelarPedido(idPedido, idCliente, rol)
+        );
+
+        assertEquals(PEDIDO_NO_PERTENECE_A_CLIENTE, exception.getMessage());
+        verify(persistencePort, never()).guardarPedido(any());
+    }
+
+    @Test
+    void cancelarPedido_deberiaLanzarExcepcion_siRolNoEsCliente() {
+        Long idPedido = 4L;
+        Long idCliente = 103L;
+        String rol = "EMPLEADO";
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> pedidoUseCase.cancelarPedido(idPedido, idCliente, rol)
+        );
+
+        assertTrue(exception.getMessage().contains("Se requiere rol: CLIENTE"));
+        verifyNoInteractions(persistencePort);
+    }
+
 
 }
