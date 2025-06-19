@@ -50,7 +50,7 @@ public class PedidoUseCase implements IPedidoService {
                 .estado(EstadoPedido.PENDIENTE)
                 .fecha(Date.from(Instant.now()))
                 .platos(pedido.getPlatos())
-                .pinSeguridad(Integer.parseInt(PinUtil.generarPinAleatorio()))
+                .pinSeguridad(PinUtil.generarPinAleatorio())
                 .build();
         persistencePort.guardarPedido(pedidoAguardar);
     }

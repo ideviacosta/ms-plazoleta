@@ -9,8 +9,7 @@ public class PinUtil {
     private PinUtil() {
     }
 
-    public static String generarPinAleatorio() {
-        int pin = new Random().nextInt(9000) + 1000;
-        return String.valueOf(pin);
+    public static int generarPinAleatorio() {
+        return random.nextInt(9000) + 1000;
     }
 }
