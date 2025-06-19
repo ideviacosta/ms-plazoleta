@@ -11,6 +11,7 @@ import com.pragma.powerup.plazoleta.domain.model.Pedido;
 import com.pragma.powerup.plazoleta.domain.spi.IEmpleadoRestaurantePersistencePort;
 import com.pragma.powerup.plazoleta.domain.spi.IPedidoPersistencePort;
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente.NotificacionSmsClient;
+import com.pragma.powerup.plazoleta.util.PinUtil;
 
 import java.time.Instant;
 import java.util.Date;
@@ -49,7 +50,7 @@ public class PedidoUseCase implements IPedidoService {
                 .estado(EstadoPedido.PENDIENTE)
                 .fecha(Date.from(Instant.now()))
                 .platos(pedido.getPlatos())
-                .pinSeguridad(Integer.parseInt(generarPinAleatorio()))
+                .pinSeguridad(Integer.parseInt(PinUtil.generarPinAleatorio()))
                 .build();
         persistencePort.guardarPedido(pedidoAguardar);
     }
@@ -106,10 +107,6 @@ public class PedidoUseCase implements IPedidoService {
                                 PEDIDO_LISTO_CODIGO_DE_ENTREGA + pedido.getPinSeguridad());
     }
 
-    private String generarPinAleatorio() {
-        int pin = new Random().nextInt(9000) + 1000;
-        return String.valueOf(pin);
-    }
 
     @Override
     public void marcarPedidoComoEntregado(Long idPedido, Long idEmpleado, int pinIngresado, String rol) {
