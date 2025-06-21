@@ -9,6 +9,9 @@ import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PedidoRequest
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.dto.PedidoResponseDto;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.mapper.PedidoRequestMapper;
 import com.pragma.powerup.plazoleta.infraestructure.input.rest.mapper.PedidoResponseMapper;
+import com.pragma.powerup.plazoleta.infraestructure.output.restclient.dto.HistorialEstadoResponseDto;
+import com.pragma.powerup.plazoleta.infraestructure.output.restclient.dto.RankingEficienciaEmpleadoDto;
+import com.pragma.powerup.plazoleta.infraestructure.output.restclient.dto.TiempoAtencionPorPedidoDto;
 
 import java.util.List;
 
@@ -64,6 +67,19 @@ public class PedidoHandler implements IPedidoHandler {
     @Override
     public void cancelarPedido(Long idPedido, Long idCliente, String rol) {
         pedidoService.cancelarPedido(idPedido, idCliente, rol);
+    }
+
+    public List<HistorialEstadoResponseDto> consultarHistorialDePedido(Long idPedido, Long idCliente, String rol){
+        return pedidoService.consultarHistorialDePedido(idPedido, idCliente, rol);
+    }
+
+    public List<TiempoAtencionPorPedidoDto> obtenerTiemposPedidos(Long idPropietario, String rol){
+        return pedidoService.obtenerTiemposPorPedido(idPropietario, rol);
+    }
+
+
+    public List<RankingEficienciaEmpleadoDto> obtenerRankingEmpleados(Long idPropietario, String rol){
+        return pedidoService.obtenerRankingPorEmpleado(idPropietario, rol);
     }
 
 }

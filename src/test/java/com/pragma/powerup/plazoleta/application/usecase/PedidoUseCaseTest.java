@@ -8,10 +8,13 @@ import com.pragma.powerup.plazoleta.domain.model.Pedido;
 import com.pragma.powerup.plazoleta.domain.model.PedidoPlato;
 import com.pragma.powerup.plazoleta.domain.spi.IEmpleadoRestaurantePersistencePort;
 import com.pragma.powerup.plazoleta.domain.spi.IPedidoPersistencePort;
+import com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente.HistorialEstadoClient;
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente.NotificacionSmsClient;
+import com.pragma.powerup.plazoleta.infraestructure.output.restclient.dto.HistorialEstadoResponseDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Date;
 import java.util.List;
 import com.pragma.powerup.plazoleta.domain.exception.RolNoAutorizadoException;
 import com.pragma.powerup.plazoleta.domain.model.PaginaRespuesta;
@@ -26,34 +29,17 @@ class PedidoUseCaseTest {
     private IEmpleadoRestaurantePersistencePort empleadoRestaurantePort;
     private NotificacionSmsClient notificacionSmsClient;
     private PedidoUseCase pedidoUseCase;
+    private HistorialEstadoClient historialEstadoClient;
 
     @BeforeEach
     void setUp() {
         persistencePort = mock(IPedidoPersistencePort.class);
         empleadoRestaurantePort=mock(IEmpleadoRestaurantePersistencePort.class);
         notificacionSmsClient = mock(NotificacionSmsClient.class);
-        pedidoUseCase = new PedidoUseCase(persistencePort, empleadoRestaurantePort, notificacionSmsClient);
+        historialEstadoClient = mock(HistorialEstadoClient.class);
+        pedidoUseCase = new PedidoUseCase(persistencePort, empleadoRestaurantePort, notificacionSmsClient, historialEstadoClient);
     }
 
-    @Test
-    void realizarPedido_DeberiaGuardarPedido_SiClienteNoTienePedidosEnProceso() {
-        // Arrange
-        Long idCliente = 1L;
-        String rol = "CLIENTE";
-        Pedido pedido = Pedido.builder()
-                .idCliente(idCliente)
-                .idRestaurante(10L)
-                .platos(List.of(new PedidoPlato(1L, 2)))
-                .build();
-
-        when(persistencePort.clienteTienePedidoEnProceso(idCliente)).thenReturn(false);
-
-        // Act
-        assertDoesNotThrow(() -> pedidoUseCase.realizarPedido(pedido, rol, idCliente));
-
-        // Assert
-        verify(persistencePort, times(1)).guardarPedido(any(Pedido.class));
-    }
 
     @Test
     void realizarPedido_DeberiaLanzarExcepcion_SiClienteYaTienePedidoEnProceso() {
@@ -76,30 +62,6 @@ class PedidoUseCaseTest {
 
         assertEquals(PEDIDO_EN_PROCESO, exception.getMessage());
         verify(persistencePort, never()).guardarPedido(any());
-    }
-
-    @Test
-    void realizarPedido_DeberiaEstablecerEstadoPendienteYFecha() {
-        // Arrange
-        Long idCliente = 3L;
-        String rol = "CLIENTE";
-        Pedido pedido = Pedido.builder()
-                .idCliente(idCliente)
-                .idRestaurante(30L)
-                .platos(List.of(new PedidoPlato(3L, 3)))
-                .build();
-
-        when(persistencePort.clienteTienePedidoEnProceso(idCliente)).thenReturn(false);
-
-        // Act
-        pedidoUseCase.realizarPedido(pedido, rol, idCliente);
-
-        // Assert
-        verify(persistencePort).guardarPedido(argThat(p ->
-                p.getEstado() == EstadoPedido.PENDIENTE &&
-                        p.getFecha() != null &&
-                        p.getIdCliente().equals(idCliente)
-        ));
     }
 
     @Test
@@ -547,6 +509,193 @@ class PedidoUseCaseTest {
 
         assertTrue(exception.getMessage().contains("Se requiere rol: CLIENTE"));
         verifyNoInteractions(persistencePort);
+    }
+
+
+    @Test
+    void realizarPedido_DeberiaGuardarHistorialDespuesDeGuardarPedido() {
+        // Arrange
+        Long idCliente = 1L;
+        String rol = "CLIENTE";
+        Pedido pedidoEntrada = Pedido.builder()
+                .idCliente(idCliente)
+                .idRestaurante(10L)
+                .platos(List.of(new PedidoPlato(1L, 2)))
+                .build();
+
+        Pedido pedidoGuardado = Pedido.builder()
+                .id(100L)
+                .idCliente(idCliente)
+                .idRestaurante(10L)
+                .estado(EstadoPedido.PENDIENTE)
+                .fecha(new Date())
+                .platos(pedidoEntrada.getPlatos())
+                .pinSeguridad(1234)
+                .build();
+
+        when(persistencePort.clienteTienePedidoEnProceso(idCliente)).thenReturn(false);
+        when(persistencePort.guardarPedido(any(Pedido.class))).thenReturn(pedidoGuardado);
+
+        // Act
+        pedidoUseCase.realizarPedido(pedidoEntrada, rol, idCliente);
+
+        // Assert
+        verify(historialEstadoClient).guardarHistorial(argThat(h ->
+                h.getIdPedido().equals(100L) &&
+                        h.getIdCliente().equals(idCliente) &&
+                        h.getEstado().equals("PENDIENTE")
+        ));
+    }
+
+    @Test
+    void asignarPedido_DeberiaGuardarHistorialConEstadoEnPreparacion() {
+        Pedido pedido = Pedido.builder()
+                .id(10L)
+                .estado(EstadoPedido.PENDIENTE)
+                .idCliente(5L)
+                .idRestaurante(1L)
+                .build();
+
+        when(persistencePort.obtenerPedidoPorId(10L)).thenReturn(pedido);
+        when(empleadoRestaurantePort.obtenerIdRestaurantePorEmpleado(5L)).thenReturn(1L);
+
+        pedidoUseCase.asignarPedido(10L, 5L, "EMPLEADO");
+
+        verify(historialEstadoClient).guardarHistorial(argThat(h ->
+                h.getIdPedido().equals(10L) &&
+                        h.getIdCliente().equals(5L) &&
+                        h.getEstado().equals("EN_PREPARACION")
+        ));
+    }
+
+    @Test
+    void notificarPedidoListo_deberiaGuardarHistorialConEstadoListo() {
+        Long idPedido = 100L;
+        Long idEmpleado = 200L;
+        String telefonoDestino = "+1234567890";
+
+        Pedido pedido = Pedido.builder()
+                .id(idPedido)
+                .idCliente(999L)
+                .idRestaurante(300L)
+                .estado(EstadoPedido.EN_PREPARACION)
+                .pinSeguridad(1234)
+                .build();
+
+        when(persistencePort.obtenerPedidoPorId(idPedido)).thenReturn(pedido);
+        when(empleadoRestaurantePort.obtenerIdRestaurantePorEmpleado(idEmpleado)).thenReturn(300L);
+
+        pedidoUseCase.notificarPedidoListo(idPedido, idEmpleado, telefonoDestino, "EMPLEADO");
+
+        verify(historialEstadoClient).guardarHistorial(argThat(h ->
+                h.getIdPedido().equals(idPedido) &&
+                        h.getIdCliente().equals(999L) &&
+                        h.getEstado().equals("LISTO")
+        ));
+    }
+
+    @Test
+    void marcarPedidoComoEntregado_deberiaGuardarHistorialConEstadoEntregado() {
+        Long idPedido = 1L;
+        Long idEmpleado = 10L;
+        int pin = 1234;
+
+        Pedido pedido = Pedido.builder()
+                .id(idPedido)
+                .idRestaurante(100L)
+                .idCliente(50L)
+                .estado(EstadoPedido.LISTO)
+                .pinSeguridad(pin)
+                .build();
+
+        when(persistencePort.obtenerPedidoPorId(idPedido)).thenReturn(pedido);
+        when(empleadoRestaurantePort.obtenerIdRestaurantePorEmpleado(idEmpleado)).thenReturn(100L);
+
+        pedidoUseCase.marcarPedidoComoEntregado(idPedido, idEmpleado, pin, "EMPLEADO");
+
+        verify(historialEstadoClient).guardarHistorial(argThat(h ->
+                h.getIdPedido().equals(idPedido) &&
+                        h.getIdCliente().equals(50L) &&
+                        h.getEstado().equals("ENTREGADO")
+        ));
+    }
+
+    @Test
+    void cancelarPedido_deberiaGuardarHistorialConEstadoCancelado() {
+        Long idPedido = 2L;
+        Long idCliente = 102L;
+
+        Pedido pedido = Pedido.builder()
+                .id(idPedido)
+                .estado(EstadoPedido.PENDIENTE)
+                .idCliente(idCliente)
+                .build();
+
+        when(persistencePort.obtenerPedidoPorId(idPedido)).thenReturn(pedido);
+
+        pedidoUseCase.cancelarPedido(idPedido, idCliente, "CLIENTE");
+
+        verify(historialEstadoClient).guardarHistorial(argThat(h ->
+                h.getIdPedido().equals(idPedido) &&
+                        h.getIdCliente().equals(idCliente) &&
+                        h.getEstado().equals("CANCELADO")
+        ));
+    }
+
+    @Test
+    void retornarHistorial_cuandoPedidoPerteneceAlCliente() {
+        // Arrange
+        Long idPedido = 1L;
+        Long idCliente = 10L;
+        String rol = "CLIENTE";
+
+        Pedido pedido = Pedido.builder()
+                .id(idPedido)
+                .idCliente(idCliente)
+                .build();
+
+        List<HistorialEstadoResponseDto> historialEsperado = List.of(
+                new HistorialEstadoResponseDto("PENDIENTE", new Date()),
+                new HistorialEstadoResponseDto("EN_PREPARACION", new Date())
+        );
+
+        when(persistencePort.obtenerPedidoPorId(idPedido)).thenReturn(pedido);
+        when(historialEstadoClient.obtenerHistorial(idPedido, idCliente)).thenReturn(historialEsperado);
+
+        // Act
+        List<HistorialEstadoResponseDto> resultado = pedidoUseCase.consultarHistorialDePedido(idPedido, idCliente, rol);
+
+        // Assert
+        assertEquals(2, resultado.size());
+        assertEquals("PENDIENTE", resultado.get(0).getEstado());
+        verify(persistencePort).obtenerPedidoPorId(idPedido);
+        verify(historialEstadoClient).obtenerHistorial(idPedido, idCliente);
+    }
+
+    @Test
+    void enviarExcepcion_cuandoPedidoNoPerteneceAlCliente() {
+        // Arrange
+        Long idPedido = 1L;
+        Long idCliente = 10L;
+        Long otroCliente = 20L;
+        String rol = "CLIENTE";
+
+        Pedido pedido = Pedido.builder()
+                .id(idPedido)
+                .idCliente(otroCliente)
+                .build();
+
+        when(persistencePort.obtenerPedidoPorId(idPedido)).thenReturn(pedido);
+
+        // Act & Assert
+        EstadoPedidoInvalidoException exception = assertThrows(
+                EstadoPedidoInvalidoException.class,
+                () -> pedidoUseCase.consultarHistorialDePedido(idPedido, idCliente, rol)
+        );
+
+        assertEquals(PEDIDO_NO_PERTENECE_A_CLIENTE, exception.getMessage());
+        verify(persistencePort).obtenerPedidoPorId(idPedido);
+        verifyNoInteractions(historialEstadoClient);
     }
 
 

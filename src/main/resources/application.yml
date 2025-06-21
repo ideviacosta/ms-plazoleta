@@ -25,6 +25,9 @@ usuarios:
 notificaciones:
   url: http://localhost:8080
 
+trazabilidad:
+  url: http://localhost:8084
+
 
 jwt:
   secret: clave-super-secreta-de-al-menos-32-caracteres

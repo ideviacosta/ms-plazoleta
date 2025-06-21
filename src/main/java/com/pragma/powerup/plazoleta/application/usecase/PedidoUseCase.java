@@ -10,12 +10,17 @@ import com.pragma.powerup.plazoleta.domain.model.PaginaRespuesta;
 import com.pragma.powerup.plazoleta.domain.model.Pedido;
 import com.pragma.powerup.plazoleta.domain.spi.IEmpleadoRestaurantePersistencePort;
 import com.pragma.powerup.plazoleta.domain.spi.IPedidoPersistencePort;
+import com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente.HistorialEstadoClient;
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente.NotificacionSmsClient;
+import com.pragma.powerup.plazoleta.infraestructure.output.restclient.dto.HistorialEstadoRequestDto;
+import com.pragma.powerup.plazoleta.infraestructure.output.restclient.dto.HistorialEstadoResponseDto;
+import com.pragma.powerup.plazoleta.infraestructure.output.restclient.dto.RankingEficienciaEmpleadoDto;
+import com.pragma.powerup.plazoleta.infraestructure.output.restclient.dto.TiempoAtencionPorPedidoDto;
 import com.pragma.powerup.plazoleta.util.PinUtil;
 
 import java.time.Instant;
 import java.util.Date;
-import java.util.Random;
+import java.util.List;
 
 import static com.pragma.powerup.plazoleta.util.MensajesError.*;
 import static com.pragma.powerup.plazoleta.util.RolValidator.validarRol;
@@ -26,15 +31,18 @@ public class PedidoUseCase implements IPedidoService {
     private final IPedidoPersistencePort persistencePort;
     private final IEmpleadoRestaurantePersistencePort empleadoRestaurantePort;
     private final NotificacionSmsClient notificacionSmsClient;
+    private final HistorialEstadoClient historialEstadoClient;
 
     public PedidoUseCase(
             IPedidoPersistencePort persistencePort,
             IEmpleadoRestaurantePersistencePort empleadoRestaurantePort,
-            NotificacionSmsClient notificacionSmsClient
+            NotificacionSmsClient notificacionSmsClient,
+            HistorialEstadoClient historialEstadoClient
     ) {
         this.persistencePort = persistencePort;
         this.empleadoRestaurantePort = empleadoRestaurantePort;
         this.notificacionSmsClient = notificacionSmsClient;
+        this.historialEstadoClient = historialEstadoClient;
     }
 
     @Override
@@ -52,7 +60,15 @@ public class PedidoUseCase implements IPedidoService {
                 .platos(pedido.getPlatos())
                 .pinSeguridad(PinUtil.generarPinAleatorio())
                 .build();
-        persistencePort.guardarPedido(pedidoAguardar);
+        Pedido pedidoGuardado = persistencePort.guardarPedido(pedidoAguardar);
+
+        historialEstadoClient.guardarHistorial(
+                new HistorialEstadoRequestDto(
+                        pedidoGuardado.getId(),
+                        idCliente,
+                        EstadoPedido.PENDIENTE.name()
+                )
+        );
     }
 
     @Override
@@ -69,6 +85,13 @@ public class PedidoUseCase implements IPedidoService {
         pedido.setIdEmpleadoAsignado(idEmpleado);
         pedido.setEstado(EstadoPedido.EN_PREPARACION);
         persistencePort.asignarPedido(idPedido, idEmpleado);
+        historialEstadoClient.guardarHistorial(
+                new HistorialEstadoRequestDto(
+                        pedido.getId(),
+                        pedido.getIdCliente(),
+                        EstadoPedido.EN_PREPARACION.name()
+                )
+        );
     }
 
 
@@ -103,6 +126,13 @@ public class PedidoUseCase implements IPedidoService {
 
         pedido.setEstado(EstadoPedido.LISTO);
         persistencePort.guardarPedido(pedido);
+        historialEstadoClient.guardarHistorial(
+                new HistorialEstadoRequestDto(
+                        pedido.getId(),
+                        pedido.getIdCliente(),
+                        EstadoPedido.LISTO.name()
+                )
+        );
         notificacionSmsClient.enviarSms(telefonoDestino,
                                 PEDIDO_LISTO_CODIGO_DE_ENTREGA + pedido.getPinSeguridad());
     }
@@ -128,6 +158,13 @@ public class PedidoUseCase implements IPedidoService {
 
         pedido.setEstado(EstadoPedido.ENTREGADO);
         persistencePort.guardarPedido(pedido);
+        historialEstadoClient.guardarHistorial(
+                new HistorialEstadoRequestDto(
+                        pedido.getId(),
+                        pedido.getIdCliente(),
+                        EstadoPedido.ENTREGADO.name()
+                )
+        );
     }
 
     @Override
@@ -146,6 +183,38 @@ public class PedidoUseCase implements IPedidoService {
 
         pedido.setEstado(EstadoPedido.CANCELADO);
         persistencePort.guardarPedido(pedido);
+        historialEstadoClient.guardarHistorial(
+                new HistorialEstadoRequestDto(
+                        pedido.getId(),
+                        pedido.getIdCliente(),
+                        EstadoPedido.CANCELADO.name()
+                )
+        );
     }
+
+    @Override
+    public List<HistorialEstadoResponseDto> consultarHistorialDePedido(Long idPedido, Long idCliente, String rol) {
+        validarRol(rol, CLIENTE);
+        Pedido pedido = persistencePort.obtenerPedidoPorId(idPedido);
+        if (!pedido.getIdCliente().equals(idCliente)) {
+            throw new EstadoPedidoInvalidoException(PEDIDO_NO_PERTENECE_A_CLIENTE);
+        }
+        return historialEstadoClient.obtenerHistorial(idPedido, idCliente);
+    }
+
+    @Override
+    public List<TiempoAtencionPorPedidoDto> obtenerTiemposPorPedido(Long idPropietario, String rol) {
+        validarRol(rol, PROPIETARIO);
+        Long idRestaurante = empleadoRestaurantePort.obtenerIdRestaurantePorEmpleado(idPropietario);
+        return historialEstadoClient.obtenerTiemposPorPedido(idRestaurante);
+    }
+
+    @Override
+    public List<RankingEficienciaEmpleadoDto> obtenerRankingPorEmpleado(Long idPropietario, String rol) {
+        validarRol(rol, PROPIETARIO);
+        Long idRestaurante = empleadoRestaurantePort.obtenerIdRestaurantePorEmpleado(idPropietario);
+        return historialEstadoClient.obtenerRankingPorEmpleado(idRestaurante);
+    }
+
 
 }
