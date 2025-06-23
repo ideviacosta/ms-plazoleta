@@ -18,6 +18,6 @@ public interface IPedidoHandler {
     void marcarPedidoComoEntregado(Long idPedido, Long idEmpleado, int pin, String rol);
     void cancelarPedido(Long idPedido, Long idCliente, String rol);
     List<HistorialEstadoResponseDto> consultarHistorialDePedido(Long idPedido, Long idCliente, String rol);
-    List<TiempoAtencionPorPedidoDto> obtenerTiemposPedidos(Long idPropietario, String rol);
-    List<RankingEficienciaEmpleadoDto> obtenerRankingEmpleados(Long idPropietario, String rol);
+    List<TiempoAtencionPorPedidoDto> obtenerTiemposPedidos(Long idPropietario, Long idRestaurante, String rol);
+    List<RankingEficienciaEmpleadoDto> obtenerRankingEmpleados(Long idPropietario, Long idRestaurante,String rol);
 }

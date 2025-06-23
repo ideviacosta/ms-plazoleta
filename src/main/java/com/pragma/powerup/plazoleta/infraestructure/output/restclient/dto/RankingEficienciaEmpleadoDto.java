@@ -3,8 +3,7 @@ package com.pragma.powerup.plazoleta.infraestructure.output.restclient.dto;
 
 public class RankingEficienciaEmpleadoDto {
     private Long idEmpleado;
-    private String nombreEmpleado;
-    private Double tiempoPromedioAtencionMinutos;
+    private Double promedioMinutos;
 
     public Long getIdEmpleado() {
         return idEmpleado;
@@ -14,19 +13,11 @@ public class RankingEficienciaEmpleadoDto {
         this.idEmpleado = idEmpleado;
     }
 
-    public String getNombreEmpleado() {
-        return nombreEmpleado;
+    public Double getPromedioMinutos() {
+        return promedioMinutos;
     }
 
-    public void setNombreEmpleado(String nombreEmpleado) {
-        this.nombreEmpleado = nombreEmpleado;
-    }
-
-    public Double getTiempoPromedioAtencionMinutos() {
-        return tiempoPromedioAtencionMinutos;
-    }
-
-    public void setTiempoPromedioAtencionMinutos(Double tiempoPromedioAtencionMinutos) {
-        this.tiempoPromedioAtencionMinutos = tiempoPromedioAtencionMinutos;
+    public void setPromedioMinutos(Double promedioMinutos) {
+        this.promedioMinutos = promedioMinutos;
     }
 }

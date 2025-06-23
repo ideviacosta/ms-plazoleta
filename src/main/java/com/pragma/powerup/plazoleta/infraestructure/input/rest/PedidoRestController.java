@@ -145,18 +145,18 @@ public class PedidoRestController {
 
     @Operation(summary = "Consultar tiempos de atención por pedido", security = @SecurityRequirement(name = "BearerAuth"))
     @GetMapping("/eficiencia/tiempos")
-    public ResponseEntity<List<TiempoAtencionPorPedidoDto>> obtenerTiemposPedidos(HttpServletRequest request) {
-        String rol = (String) request.getAttribute("rol");
-        Long idPropietario = (Long) request.getAttribute("idUsuario");
-        return ResponseEntity.ok(pedidoHandler.obtenerTiemposPedidos(idPropietario, rol));
+    public ResponseEntity<List<TiempoAtencionPorPedidoDto>> obtenerTiemposPedidos(@RequestParam Long idRestaurante,HttpServletRequest request) {
+        String rol = (String) request.getAttribute(ATTR_ROL);
+        Long idPropietario = (Long) request.getAttribute(ATTR_ID_USUARIO);
+        return ResponseEntity.ok(pedidoHandler.obtenerTiemposPedidos(idPropietario, idRestaurante, rol));
     }
 
     @Operation(summary = "Consultar ranking de eficiencia por empleado", security = @SecurityRequirement(name = "BearerAuth"))
     @GetMapping("/eficiencia/ranking")
-    public ResponseEntity<List<RankingEficienciaEmpleadoDto>> obtenerRanking(HttpServletRequest request) {
-        String rol = (String) request.getAttribute("rol");
-        Long idPropietario = (Long) request.getAttribute("idUsuario");
-        return ResponseEntity.ok(pedidoHandler.obtenerRankingEmpleados(idPropietario, rol));
+    public ResponseEntity<List<RankingEficienciaEmpleadoDto>> obtenerRanking(@RequestParam Long idRestaurante,HttpServletRequest request) {
+        String rol = (String) request.getAttribute(ATTR_ROL);
+        Long idPropietario = (Long) request.getAttribute(ATTR_ID_USUARIO);
+        return ResponseEntity.ok(pedidoHandler.obtenerRankingEmpleados(idPropietario, idRestaurante,rol));
     }
 
 

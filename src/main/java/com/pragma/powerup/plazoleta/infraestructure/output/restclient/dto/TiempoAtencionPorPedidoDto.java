@@ -4,9 +4,9 @@ import java.util.Date;
 
 public class TiempoAtencionPorPedidoDto {
     private Long idPedido;
-    private Date fechaInicio;
-    private Date fechaFin;
-    private Long duracionEnMinutos;
+    private Long idEmpleado;
+    private Long idCliente;
+    private Long tiempoEnMinutos;
 
     public Long getIdPedido() {
         return idPedido;
@@ -16,27 +16,27 @@ public class TiempoAtencionPorPedidoDto {
         this.idPedido = idPedido;
     }
 
-    public Date getFechaInicio() {
-        return fechaInicio;
+    public Long getIdEmpleado() {
+        return idEmpleado;
     }
 
-    public void setFechaInicio(Date fechaInicio) {
-        this.fechaInicio = fechaInicio;
+    public void setIdEmpleado(Long idEmpleado) {
+        this.idEmpleado = idEmpleado;
     }
 
-    public Date getFechaFin() {
-        return fechaFin;
+    public Long getIdCliente() {
+        return idCliente;
     }
 
-    public void setFechaFin(Date fechaFin) {
-        this.fechaFin = fechaFin;
+    public void setIdCliente(Long idCliente) {
+        this.idCliente = idCliente;
     }
 
-    public Long getDuracionEnMinutos() {
-        return duracionEnMinutos;
+    public Long getTiempoEnMinutos() {
+        return tiempoEnMinutos;
     }
 
-    public void setDuracionEnMinutos(Long duracionEnMinutos) {
-        this.duracionEnMinutos = duracionEnMinutos;
+    public void setTiempoEnMinutos(Long tiempoEnMinutos) {
+        this.tiempoEnMinutos = tiempoEnMinutos;
     }
 }

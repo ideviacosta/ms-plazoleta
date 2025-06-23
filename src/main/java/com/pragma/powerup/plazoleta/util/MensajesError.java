@@ -25,4 +25,6 @@ public class MensajesError {
     public static final String SOLO_SE_PUEDE_MARCAR_ENTREGADO_SI_LISTO = "Solo se puede marcar como entregado un pedido en estado LISTO";
     public static final String PEDIDO_NO_PERTENECE_A_CLIENTE = "Este pedido no pertenece al cliente autenticado.";
     public static final String PEDIDO_EN_PREPARACION_NO_CANCELABLE ="Lo sentimos, tu pedido ya está en preparación y no puede cancelarse.";
+    public static final String PROPIETARIO_NO_ES_DUENIO_RESTAURANTE = "No puede consultar informacion de un restaurante que no le pertenece";
+
 }

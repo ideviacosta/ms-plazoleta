@@ -1,5 +1,6 @@
 package com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.dto.HistorialEstadoRequestDto;
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.dto.HistorialEstadoResponseDto;
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.dto.RankingEficienciaEmpleadoDto;
@@ -48,8 +49,22 @@ public class HistorialEstadoClient {
         String endpoint = trazabilidadUrl + "/trazabilidad/tiempo-pedidos?idRestaurante=" + idRestaurante;
         ResponseEntity<TiempoAtencionPorPedidoDto[]> response =
                 restTemplate.getForEntity(endpoint, TiempoAtencionPorPedidoDto[].class);
-        return Arrays.asList(response.getBody());
+
+        List<TiempoAtencionPorPedidoDto> tiempos = Arrays.asList(response.getBody());
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        tiempos.forEach(tiempo -> {
+            try {
+                String json = objectMapper.writeValueAsString(tiempo);
+                System.out.println(json);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        return tiempos;
     }
+
 
     public List<RankingEficienciaEmpleadoDto> obtenerRankingPorEmpleado(Long idRestaurante) {
         String endpoint = trazabilidadUrl + "/trazabilidad/ranking-empleados?idRestaurante=" + idRestaurante;

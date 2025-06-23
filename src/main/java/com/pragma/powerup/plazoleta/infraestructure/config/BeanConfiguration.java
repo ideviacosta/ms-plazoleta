@@ -65,8 +65,8 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public IPedidoService pedidoService(IPedidoPersistencePort pedidoPersistencePort, IEmpleadoRestaurantePersistencePort empleadoRestaurantePort, NotificacionSmsClient notificacionSmsClient, HistorialEstadoClient historialEstadoClient) {
-        return new PedidoUseCase(pedidoPersistencePort, empleadoRestaurantePort , notificacionSmsClient, historialEstadoClient);
+    public IPedidoService pedidoService(IPedidoPersistencePort pedidoPersistencePort, IEmpleadoRestaurantePersistencePort empleadoRestaurantePort, NotificacionSmsClient notificacionSmsClient, HistorialEstadoClient historialEstadoClient, IRestauranteValidationPort restauranteValidationPort) {
+        return new PedidoUseCase(pedidoPersistencePort, empleadoRestaurantePort , notificacionSmsClient, historialEstadoClient, restauranteValidationPort);
     }
 
     // ---------- Handlers ----------

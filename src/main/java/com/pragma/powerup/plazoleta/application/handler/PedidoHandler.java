@@ -73,13 +73,13 @@ public class PedidoHandler implements IPedidoHandler {
         return pedidoService.consultarHistorialDePedido(idPedido, idCliente, rol);
     }
 
-    public List<TiempoAtencionPorPedidoDto> obtenerTiemposPedidos(Long idPropietario, String rol){
-        return pedidoService.obtenerTiemposPorPedido(idPropietario, rol);
+    public List<TiempoAtencionPorPedidoDto> obtenerTiemposPedidos(Long idPropietario, Long idRestaurante, String rol){
+        return pedidoService.obtenerTiemposPorPedido(idPropietario, idRestaurante, rol);
     }
 
 
-    public List<RankingEficienciaEmpleadoDto> obtenerRankingEmpleados(Long idPropietario, String rol){
-        return pedidoService.obtenerRankingPorEmpleado(idPropietario, rol);
+    public List<RankingEficienciaEmpleadoDto> obtenerRankingEmpleados(Long idPropietario, Long idRestaurante,String rol){
+        return pedidoService.obtenerRankingPorEmpleado(idPropietario, idRestaurante, rol);
     }
 
 }
