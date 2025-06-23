@@ -1,8 +1,6 @@
 package com.pragma.powerup.plazoleta.application.usecase;
 
-import com.pragma.powerup.plazoleta.domain.exception.EstadoPedidoInvalidoException;
-import com.pragma.powerup.plazoleta.domain.exception.PedidoEnProcesoException;
-import com.pragma.powerup.plazoleta.domain.exception.PedidoYaAsignadoException;
+import com.pragma.powerup.plazoleta.domain.exception.*;
 import com.pragma.powerup.plazoleta.domain.model.EstadoPedido;
 import com.pragma.powerup.plazoleta.domain.model.Pedido;
 import com.pragma.powerup.plazoleta.domain.model.PedidoPlato;
@@ -12,12 +10,14 @@ import com.pragma.powerup.plazoleta.domain.spi.IRestauranteValidationPort;
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente.HistorialEstadoClient;
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente.NotificacionSmsClient;
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.dto.HistorialEstadoResponseDto;
+import com.pragma.powerup.plazoleta.infraestructure.output.restclient.dto.RankingEficienciaEmpleadoDto;
+import com.pragma.powerup.plazoleta.infraestructure.output.restclient.dto.TiempoAtencionPorPedidoDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 import java.util.List;
-import com.pragma.powerup.plazoleta.domain.exception.RolNoAutorizadoException;
+
 import com.pragma.powerup.plazoleta.domain.model.PaginaRespuesta;
 
 import static com.pragma.powerup.plazoleta.util.MensajesError.*;
@@ -699,6 +699,119 @@ class PedidoUseCaseTest {
 
         assertEquals(PEDIDO_NO_PERTENECE_A_CLIENTE, exception.getMessage());
         verify(persistencePort).obtenerPedidoPorId(idPedido);
+        verifyNoInteractions(historialEstadoClient);
+    }
+
+    @Test
+    void obtenerTiemposPorPedido_deberiaRetornarListaCorrecta_siRolEsPropietarioYPropietarioValido() {
+        Long idPropietario = 1L;
+        Long idRestaurante = 10L;
+        String rol = "PROPIETARIO";
+
+        List<TiempoAtencionPorPedidoDto> tiemposMock = List.of(
+                new TiempoAtencionPorPedidoDto() {{
+                    setIdPedido(1L);
+                    setIdEmpleado(2L);
+                    setIdCliente(3L);
+                    setTiempoEnMinutos(15L);
+                }}
+        );
+
+        when(restauranteValidationPort.esPropietarioDelRestaurante(idPropietario, idRestaurante)).thenReturn(false);
+        when(historialEstadoClient.obtenerTiemposPorPedido(idRestaurante)).thenReturn(tiemposMock);
+
+        List<TiempoAtencionPorPedidoDto> resultado = pedidoUseCase.obtenerTiemposPorPedido(idPropietario, idRestaurante, rol);
+
+        assertEquals(1, resultado.size());
+        assertEquals(15L, resultado.get(0).getTiempoEnMinutos());
+        verify(historialEstadoClient, times(1)).obtenerTiemposPorPedido(idRestaurante);
+    }
+
+    @Test
+    void obtenerTiemposPorPedido_deberiaLanzarExcepcion_siRolNoEsPropietario() {
+        Long idPropietario = 1L;
+        Long idRestaurante = 10L;
+        String rol = "CLIENTE";
+
+        RolNoAutorizadoException exception = assertThrows(
+                RolNoAutorizadoException.class,
+                () -> pedidoUseCase.obtenerTiemposPorPedido(idPropietario, idRestaurante, rol)
+        );
+
+        assertTrue(exception.getMessage().contains("Se requiere rol: PROPIETARIO"));
+        verifyNoInteractions(historialEstadoClient);
+    }
+
+    @Test
+    void obtenerTiemposPorPedido_deberiaLanzarExcepcion_siPropietarioNoEsValido() {
+        Long idPropietario = 1L;
+        Long idRestaurante = 10L;
+        String rol = "PROPIETARIO";
+
+        when(restauranteValidationPort.esPropietarioDelRestaurante(idPropietario, idRestaurante)).thenReturn(true);
+
+        PropietarioInvalidoException exception = assertThrows(
+                PropietarioInvalidoException.class,
+                () -> pedidoUseCase.obtenerTiemposPorPedido(idPropietario, idRestaurante, rol)
+        );
+
+        assertEquals(PROPIETARIO_NO_ES_DUENIO_RESTAURANTE, exception.getMessage());
+        verifyNoInteractions(historialEstadoClient);
+    }
+
+    @Test
+    void obtenerRankingPorEmpleado_deberiaRetornarListaCorrecta_siRolEsPropietarioYPropietarioValido() {
+        Long idPropietario = 1L;
+        Long idRestaurante = 10L;
+        String rol = "PROPIETARIO";
+
+        List<RankingEficienciaEmpleadoDto> rankingMock = List.of(
+                new RankingEficienciaEmpleadoDto() {{
+                    setIdEmpleado(5L);
+                    setPromedioMinutos(12.5);
+                }}
+        );
+
+        when(restauranteValidationPort.esPropietarioDelRestaurante(idPropietario, idRestaurante)).thenReturn(false);
+        when(historialEstadoClient.obtenerRankingPorEmpleado(idRestaurante)).thenReturn(rankingMock);
+
+        List<RankingEficienciaEmpleadoDto> resultado = pedidoUseCase.obtenerRankingPorEmpleado(idPropietario, idRestaurante, rol);
+
+        assertEquals(1, resultado.size());
+        assertEquals(5L, resultado.get(0).getIdEmpleado());
+        assertEquals(12.5, resultado.get(0).getPromedioMinutos());
+        verify(historialEstadoClient, times(1)).obtenerRankingPorEmpleado(idRestaurante);
+    }
+
+    @Test
+    void obtenerRankingPorEmpleado_deberiaLanzarExcepcion_siRolNoEsPropietario() {
+        Long idPropietario = 1L;
+        Long idRestaurante = 10L;
+        String rol = "EMPLEADO";
+
+        RolNoAutorizadoException exception = assertThrows(
+                RolNoAutorizadoException.class,
+                () -> pedidoUseCase.obtenerRankingPorEmpleado(idPropietario, idRestaurante, rol)
+        );
+
+        assertTrue(exception.getMessage().contains("Se requiere rol: PROPIETARIO"));
+        verifyNoInteractions(historialEstadoClient);
+    }
+
+    @Test
+    void obtenerRankingPorEmpleado_deberiaLanzarExcepcion_siPropietarioNoEsValido() {
+        Long idPropietario = 1L;
+        Long idRestaurante = 10L;
+        String rol = "PROPIETARIO";
+
+        when(restauranteValidationPort.esPropietarioDelRestaurante(idPropietario, idRestaurante)).thenReturn(true);
+
+        PropietarioInvalidoException exception = assertThrows(
+                PropietarioInvalidoException.class,
+                () -> pedidoUseCase.obtenerRankingPorEmpleado(idPropietario, idRestaurante, rol)
+        );
+
+        assertEquals(PROPIETARIO_NO_ES_DUENIO_RESTAURANTE, exception.getMessage());
         verifyNoInteractions(historialEstadoClient);
     }
 
