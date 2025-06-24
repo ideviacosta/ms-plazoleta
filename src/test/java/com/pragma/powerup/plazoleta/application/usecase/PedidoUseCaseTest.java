@@ -5,6 +5,7 @@ import com.pragma.powerup.plazoleta.domain.model.EstadoPedido;
 import com.pragma.powerup.plazoleta.domain.model.Pedido;
 import com.pragma.powerup.plazoleta.domain.model.PedidoPlato;
 import com.pragma.powerup.plazoleta.domain.spi.IEmpleadoRestaurantePersistencePort;
+import com.pragma.powerup.plazoleta.domain.spi.IHistorialEstadoPersistencePort;
 import com.pragma.powerup.plazoleta.domain.spi.IPedidoPersistencePort;
 import com.pragma.powerup.plazoleta.domain.spi.IRestauranteValidationPort;
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente.HistorialEstadoClient;
@@ -32,6 +33,7 @@ class PedidoUseCaseTest {
     private PedidoUseCase pedidoUseCase;
     private HistorialEstadoClient historialEstadoClient;
     private IRestauranteValidationPort restauranteValidationPort;
+    private IHistorialEstadoPersistencePort historialEstadoPersistencePort;
 
 
     @BeforeEach
@@ -41,7 +43,8 @@ class PedidoUseCaseTest {
         notificacionSmsClient = mock(NotificacionSmsClient.class);
         historialEstadoClient = mock(HistorialEstadoClient.class);
         restauranteValidationPort =mock(IRestauranteValidationPort.class);
-        pedidoUseCase = new PedidoUseCase(persistencePort, empleadoRestaurantePort, notificacionSmsClient, historialEstadoClient, restauranteValidationPort);
+        historialEstadoPersistencePort = mock(IHistorialEstadoPersistencePort.class);
+        pedidoUseCase = new PedidoUseCase(persistencePort, empleadoRestaurantePort, notificacionSmsClient, historialEstadoPersistencePort, restauranteValidationPort);
     }
 
 
@@ -544,7 +547,7 @@ class PedidoUseCaseTest {
         pedidoUseCase.realizarPedido(pedidoEntrada, rol, idCliente);
 
         // Assert
-        verify(historialEstadoClient).guardarHistorial(argThat(h ->
+        verify(historialEstadoPersistencePort).guardarHistorial(argThat(h ->
                 h.getIdPedido().equals(100L) &&
                         h.getIdCliente().equals(idCliente) &&
                         h.getEstado().equals("PENDIENTE")
@@ -565,7 +568,7 @@ class PedidoUseCaseTest {
 
         pedidoUseCase.asignarPedido(10L, 5L, "EMPLEADO");
 
-        verify(historialEstadoClient).guardarHistorial(argThat(h ->
+        verify(historialEstadoPersistencePort).guardarHistorial(argThat(h ->
                 h.getIdPedido().equals(10L) &&
                         h.getIdCliente().equals(5L) &&
                         h.getEstado().equals("EN_PREPARACION")
@@ -591,7 +594,7 @@ class PedidoUseCaseTest {
 
         pedidoUseCase.notificarPedidoListo(idPedido, idEmpleado, telefonoDestino, "EMPLEADO");
 
-        verify(historialEstadoClient).guardarHistorial(argThat(h ->
+        verify(historialEstadoPersistencePort).guardarHistorial(argThat(h ->
                 h.getIdPedido().equals(idPedido) &&
                         h.getIdCliente().equals(999L) &&
                         h.getEstado().equals("LISTO")
@@ -617,7 +620,7 @@ class PedidoUseCaseTest {
 
         pedidoUseCase.marcarPedidoComoEntregado(idPedido, idEmpleado, pin, "EMPLEADO");
 
-        verify(historialEstadoClient).guardarHistorial(argThat(h ->
+        verify(historialEstadoPersistencePort).guardarHistorial(argThat(h ->
                 h.getIdPedido().equals(idPedido) &&
                         h.getIdCliente().equals(50L) &&
                         h.getEstado().equals("ENTREGADO")
@@ -639,7 +642,7 @@ class PedidoUseCaseTest {
 
         pedidoUseCase.cancelarPedido(idPedido, idCliente, "CLIENTE");
 
-        verify(historialEstadoClient).guardarHistorial(argThat(h ->
+        verify(historialEstadoPersistencePort).guardarHistorial(argThat(h ->
                 h.getIdPedido().equals(idPedido) &&
                         h.getIdCliente().equals(idCliente) &&
                         h.getEstado().equals("CANCELADO")
@@ -664,7 +667,7 @@ class PedidoUseCaseTest {
         );
 
         when(persistencePort.obtenerPedidoPorId(idPedido)).thenReturn(pedido);
-        when(historialEstadoClient.obtenerHistorial(idPedido, idCliente)).thenReturn(historialEsperado);
+        when(historialEstadoPersistencePort.obtenerHistorial(idPedido, idCliente)).thenReturn(historialEsperado);
 
         // Act
         List<HistorialEstadoResponseDto> resultado = pedidoUseCase.consultarHistorialDePedido(idPedido, idCliente, rol);
@@ -673,7 +676,7 @@ class PedidoUseCaseTest {
         assertEquals(2, resultado.size());
         assertEquals("PENDIENTE", resultado.get(0).getEstado());
         verify(persistencePort).obtenerPedidoPorId(idPedido);
-        verify(historialEstadoClient).obtenerHistorial(idPedido, idCliente);
+        verify(historialEstadoPersistencePort).obtenerHistorial(idPedido, idCliente);
     }
 
     @Test
@@ -699,7 +702,7 @@ class PedidoUseCaseTest {
 
         assertEquals(PEDIDO_NO_PERTENECE_A_CLIENTE, exception.getMessage());
         verify(persistencePort).obtenerPedidoPorId(idPedido);
-        verifyNoInteractions(historialEstadoClient);
+        verifyNoInteractions(historialEstadoPersistencePort);
     }
 
     @Test
@@ -718,13 +721,13 @@ class PedidoUseCaseTest {
         );
 
         when(restauranteValidationPort.esPropietarioDelRestaurante(idPropietario, idRestaurante)).thenReturn(false);
-        when(historialEstadoClient.obtenerTiemposPorPedido(idRestaurante)).thenReturn(tiemposMock);
+        when(historialEstadoPersistencePort.obtenerTiemposPorPedido(idRestaurante)).thenReturn(tiemposMock);
 
         List<TiempoAtencionPorPedidoDto> resultado = pedidoUseCase.obtenerTiemposPorPedido(idPropietario, idRestaurante, rol);
 
         assertEquals(1, resultado.size());
         assertEquals(15L, resultado.get(0).getTiempoEnMinutos());
-        verify(historialEstadoClient, times(1)).obtenerTiemposPorPedido(idRestaurante);
+        verify(historialEstadoPersistencePort, times(1)).obtenerTiemposPorPedido(idRestaurante);
     }
 
     @Test
@@ -739,7 +742,7 @@ class PedidoUseCaseTest {
         );
 
         assertTrue(exception.getMessage().contains("Se requiere rol: PROPIETARIO"));
-        verifyNoInteractions(historialEstadoClient);
+        verifyNoInteractions(historialEstadoPersistencePort);
     }
 
     @Test
@@ -756,7 +759,7 @@ class PedidoUseCaseTest {
         );
 
         assertEquals(PROPIETARIO_NO_ES_DUENIO_RESTAURANTE, exception.getMessage());
-        verifyNoInteractions(historialEstadoClient);
+        verifyNoInteractions(historialEstadoPersistencePort);
     }
 
     @Test
@@ -773,14 +776,14 @@ class PedidoUseCaseTest {
         );
 
         when(restauranteValidationPort.esPropietarioDelRestaurante(idPropietario, idRestaurante)).thenReturn(false);
-        when(historialEstadoClient.obtenerRankingPorEmpleado(idRestaurante)).thenReturn(rankingMock);
+        when(historialEstadoPersistencePort.obtenerRankingPorEmpleado(idRestaurante)).thenReturn(rankingMock);
 
         List<RankingEficienciaEmpleadoDto> resultado = pedidoUseCase.obtenerRankingPorEmpleado(idPropietario, idRestaurante, rol);
 
         assertEquals(1, resultado.size());
         assertEquals(5L, resultado.get(0).getIdEmpleado());
         assertEquals(12.5, resultado.get(0).getPromedioMinutos());
-        verify(historialEstadoClient, times(1)).obtenerRankingPorEmpleado(idRestaurante);
+        verify(historialEstadoPersistencePort, times(1)).obtenerRankingPorEmpleado(idRestaurante);
     }
 
     @Test
@@ -795,7 +798,7 @@ class PedidoUseCaseTest {
         );
 
         assertTrue(exception.getMessage().contains("Se requiere rol: PROPIETARIO"));
-        verifyNoInteractions(historialEstadoClient);
+        verifyNoInteractions(historialEstadoPersistencePort);
     }
 
     @Test
@@ -812,7 +815,7 @@ class PedidoUseCaseTest {
         );
 
         assertEquals(PROPIETARIO_NO_ES_DUENIO_RESTAURANTE, exception.getMessage());
-        verifyNoInteractions(historialEstadoClient);
+        verifyNoInteractions(historialEstadoPersistencePort);
     }
 
 

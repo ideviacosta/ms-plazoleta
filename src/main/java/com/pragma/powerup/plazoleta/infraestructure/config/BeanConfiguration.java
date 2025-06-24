@@ -16,6 +16,7 @@ import com.pragma.powerup.plazoleta.infraestructure.output.jpa.adapter.PedidoJpa
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.repository.IEmpleadoRestauranteRepository;
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.repository.IPedidoRepository;
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente.HistorialEstadoClient;
+import com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente.HistorialEstadoRestAdapter;
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente.NotificacionSmsClient;
 import com.pragma.powerup.plazoleta.util.JwtUtil;
 import com.pragma.powerup.plazoleta.infraestructure.output.jpa.adapter.PlatoJpaAdapter;
@@ -35,6 +36,11 @@ public class BeanConfiguration {
     public RestauranteJpaAdapter restauranteJpaAdapter(IRestauranteRepository restauranteRepository,
                                                        UsuarioRestClient usuarioRestClient) {
         return new RestauranteJpaAdapter(restauranteRepository, usuarioRestClient);
+    }
+
+    @Bean
+    public IHistorialEstadoPersistencePort historialEstadoPersistencePort(HistorialEstadoClient historialEstadoClient) {
+        return new HistorialEstadoRestAdapter(historialEstadoClient);
     }
 
     @Bean
@@ -65,8 +71,8 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public IPedidoService pedidoService(IPedidoPersistencePort pedidoPersistencePort, IEmpleadoRestaurantePersistencePort empleadoRestaurantePort, NotificacionSmsClient notificacionSmsClient, HistorialEstadoClient historialEstadoClient, IRestauranteValidationPort restauranteValidationPort) {
-        return new PedidoUseCase(pedidoPersistencePort, empleadoRestaurantePort , notificacionSmsClient, historialEstadoClient, restauranteValidationPort);
+    public IPedidoService pedidoService(IPedidoPersistencePort pedidoPersistencePort, IEmpleadoRestaurantePersistencePort empleadoRestaurantePort, NotificacionSmsClient notificacionSmsClient,  IHistorialEstadoPersistencePort historialEstadoPersistencePort,IRestauranteValidationPort restauranteValidationPort) {
+        return new PedidoUseCase(pedidoPersistencePort, empleadoRestaurantePort , notificacionSmsClient, historialEstadoPersistencePort,restauranteValidationPort);
     }
 
     // ---------- Handlers ----------

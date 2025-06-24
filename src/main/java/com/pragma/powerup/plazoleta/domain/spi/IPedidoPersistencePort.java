@@ -7,7 +7,6 @@ import com.pragma.powerup.plazoleta.domain.model.Pedido;
 public interface IPedidoPersistencePort {
     boolean clienteTienePedidoEnProceso(Long idCliente);
     Pedido guardarPedido(Pedido pedido);
-
     void asignarPedido(Long idPedido, Long idEmpleado);
     Pedido obtenerPedidoPorId(Long idPedido);
     PaginaRespuesta<Pedido> listarPedidosPorEstadoYEmpleado(Long idRestaurante, Long idEmpleado, EstadoPedido estado, int page, int size);
