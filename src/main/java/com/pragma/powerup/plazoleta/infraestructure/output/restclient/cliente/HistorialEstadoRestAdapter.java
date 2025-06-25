@@ -1,7 +1,6 @@
 package com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente;
 
-import com.pragma.powerup.plazoleta.domain.spi.IHistorialEstadoPersistencePort;
-import com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente.HistorialEstadoClient;
+import com.pragma.powerup.plazoleta.domain.api.IHistorialEstadoPersistencePort;
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.dto.HistorialEstadoRequestDto;
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.dto.HistorialEstadoResponseDto;
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.dto.RankingEficienciaEmpleadoDto;

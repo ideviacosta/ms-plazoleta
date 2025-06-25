@@ -5,7 +5,7 @@ import com.pragma.powerup.plazoleta.domain.model.EstadoPedido;
 import com.pragma.powerup.plazoleta.domain.model.Pedido;
 import com.pragma.powerup.plazoleta.domain.model.PedidoPlato;
 import com.pragma.powerup.plazoleta.domain.spi.IEmpleadoRestaurantePersistencePort;
-import com.pragma.powerup.plazoleta.domain.spi.IHistorialEstadoPersistencePort;
+import com.pragma.powerup.plazoleta.domain.api.IHistorialEstadoPersistencePort;
 import com.pragma.powerup.plazoleta.domain.spi.IPedidoPersistencePort;
 import com.pragma.powerup.plazoleta.domain.spi.IRestauranteValidationPort;
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.cliente.HistorialEstadoClient;

@@ -7,6 +7,7 @@ import com.pragma.powerup.plazoleta.application.handler.PlatoHandler;
 import com.pragma.powerup.plazoleta.application.usecase.PedidoUseCase;
 import com.pragma.powerup.plazoleta.application.usecase.PlatoUseCase;
 import com.pragma.powerup.plazoleta.application.usecase.RestauranteUseCase;
+import com.pragma.powerup.plazoleta.domain.api.IHistorialEstadoPersistencePort;
 import com.pragma.powerup.plazoleta.domain.api.IPedidoService;
 import com.pragma.powerup.plazoleta.domain.api.IPlatoService;
 import com.pragma.powerup.plazoleta.domain.api.IRestauranteService;

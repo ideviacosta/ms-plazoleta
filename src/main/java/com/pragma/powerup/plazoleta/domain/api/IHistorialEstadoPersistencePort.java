@@ -1,4 +1,4 @@
-package com.pragma.powerup.plazoleta.domain.spi;
+package com.pragma.powerup.plazoleta.domain.api;
 
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.dto.HistorialEstadoRequestDto;
 import com.pragma.powerup.plazoleta.infraestructure.output.restclient.dto.HistorialEstadoResponseDto;
